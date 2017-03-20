@@ -1,0 +1,14 @@
+/target
+
+*.prefs
+
+.classpath
+
+.project
+
+*.ser
+
+site*
+/target
+
+operias-servlet/results/operias.xml
