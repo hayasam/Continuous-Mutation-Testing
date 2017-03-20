@@ -41,7 +41,6 @@ public class Runner {
 		ArrayList<Integer> diffCoveredLines = new ArrayList<Integer>();
 		diffCoveredLines.add(9);
 		diffCoveredLines.add(10);
-		diffCoveredLines.add(11);
 		
 		//actual covered content = size/2;
 		parseSetToInflexionPoints(coveredContent,diffCoveredLines);
