@@ -3,52 +3,71 @@ package mutation.testing;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Runner {
+import operias.report.OperiasFile;
 
+public class MutatedFile {
+
+	private String systemFileName;
+	private String mutationReportPath;
+	private ArrayList<Integer> diffCoveredLines;
+	private ArrayList<InflexionPoint> inflexionPoints;
 	
-	private static ArrayList<InflexionPoint> inflexionPoints = new ArrayList<InflexionPoint>();
-	
-	public static void main(String[] args) throws IOException {
-		
-		//System.out.println("Working Directory = " +System.getProperty("user.dir"));
-		File mutationReport = new File("BankAccount.java.html");
-		
-		Document doc = Jsoup.parse(mutationReport, "UTF-8", "http://example.com/");
-		//System.out.println(doc);
-			
-		//these are lines that have mutants created fot them and are covered my tests
-		Elements coveredContent = doc.getElementsByAttributeValue("class", "covered");
-			
-		//these are lines that have mutants created for them BUT there is no test coverage
-		Elements noTestCoverageContent = doc.getElementsByAttributeValue("class", "uncovered");
-			
-		//these lines dont have any mutant to create for them. only code line available.
-		Elements noAvailableOperator = doc.getElementsByAttributeValue("class", "na");
-			
-			
-			
-		//talk about lines that are changed but not covered => add warning	
-		
-		//if line is changed && covegred add to difflines
-		//get diff lines
-		ArrayList<Integer> diffCoveredLines = new ArrayList<Integer>();
-		diffCoveredLines.add(9);
-		diffCoveredLines.add(10);
-		
-		//actual covered content = size/2;
-		parseSetToInflexionPoints(coveredContent,diffCoveredLines);
-		System.out.println(inflexionPoints.size());
+	public MutatedFile(String fileName, ArrayList<Integer> diffCoveredLines){
+		this.diffCoveredLines = diffCoveredLines;
+		this.systemFileName = fileName;
 	}
 	
+	public void setMutationReportPath(String path){
+		this.mutationReportPath = path;
+		extractMutationReport();
+	}
 	
-	static void parseSetToInflexionPoints(Elements content, ArrayList<Integer> diffCoveredLines){
+	public ArrayList<Integer> getDiffCoveredLines() {
+		return diffCoveredLines;
+	}
+	
+	public String getMutationReportPath() {
+		return mutationReportPath;
+	}
+	
+	private void extractMutationReport() {
+		File mutationReport = new File(this.mutationReportPath);
+		
+		Document doc;
+		try {
+			doc = Jsoup.parse(mutationReport, "UTF-8", "http://example.com/");
+			//these are lines that have mutants created fot them and are covered my tests
+			Elements coveredContent = doc.getElementsByAttributeValue("class", "covered");
+				
+			//these are lines that have mutants created for them BUT there is no test coverage
+			Elements noTestCoverageContent = doc.getElementsByAttributeValue("class", "uncovered");
+				
+			//these lines dont have any mutant to create for them. only code line available.
+			Elements noAvailableOperator = doc.getElementsByAttributeValue("class", "na");
+			
+			//TODO talk about lines that are changed but not covered => add warning	
+			
+			//if line is changed && covegred add to difflines
+			//get diff lines
+			ArrayList<Integer> diffCoveredLines = getDiffCoveredLines();
+			
+			//actual covered content = size/2;
+			parseSetToInflexionPoints(coveredContent,diffCoveredLines);
+			
+			System.out.println("places with survived mutants "+inflexionPoints.size());
+			System.out.println(inflexionPoints.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	private void parseSetToInflexionPoints(Elements content, ArrayList<Integer> diffCoveredLines){
 		int counter =0;
 		while(counter<content.size()){
 			int codeLineNumber = Integer.parseInt(content.get(counter).ownText());
@@ -69,7 +88,8 @@ public class Runner {
 		}
 	}
 	
-	static ArrayList<Mutation> processMutantsInfo(String info){
+	
+	private ArrayList<Mutation> processMutantsInfo(String info){
 		
 		String[] tokens = info.split(" ");
 		int numberOfMutantsForLine = Integer.parseInt(info.split(" ")[0]);
@@ -95,8 +115,9 @@ public class Runner {
 	}
 	
 	
+
 	//TODO not all operators have valid condition nor unique
-	static String parseDescriptionToMutantName(String description){
+	private String parseDescriptionToMutantName(String description){
 		
 		String mutantName = null;
 		String mutationDescription;
@@ -152,5 +173,11 @@ public class Runner {
 		}
 		return mutantName;
 	}
-
+	
+	public void print(){
+		System.out.println("Mutated file:.......................");
+		System.out.println(systemFileName);
+		System.out.println(diffCoveredLines);
+		
+	}
 }

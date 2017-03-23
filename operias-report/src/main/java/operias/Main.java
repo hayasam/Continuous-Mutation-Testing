@@ -22,8 +22,9 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		
+		
+		
 		Configuration.parseArguments(args);
-
 		
 		// Check if the directories were set
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
@@ -32,16 +33,17 @@ public class Main {
 		}
 		
 		new Operias().constructReport().writeHTMLReport().writeXMLReport();
-
-
+		
+		
 		Main.printLine("[Info] Cleaning up!");
 		// Remove temporary directory
+		/*
 		try {
 			FileUtils.deleteDirectory(new File(Configuration.getTemporaryDirectory()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		*/
 		Main.printLine("[Info] Execution of operias was a great success!");
 	}
 	

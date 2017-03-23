@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import mutation.testing.OperiasMutated;
 import operias.coverage.*;
 import operias.diff.DiffReport;
 import operias.output.html.HTMLReport;
@@ -65,7 +66,13 @@ public class Operias {
 		}
 		Main.printLine("[Info] Start to combine reports");
 		
+		
+		
 		report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
+		
+		System.out.println("-------------------------------------------------");
+		new OperiasMutated(report);
+		System.out.println("-------------------------------------------------");
 		
 		return this;
 	}

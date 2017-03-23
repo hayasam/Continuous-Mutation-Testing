@@ -52,6 +52,7 @@ public class Cobertura {
 				Main.printLine("[Info] [" + Thread.currentThread().getName() + "] Parsing Cobertura report");
 				CoverageReport coberturaReport = constructReport();
 				Main.printLine("[Info] [" + Thread.currentThread().getName() + "] Cleaning up after Cobertura");
+				
 				cleanUp();
 				Main.printLine("[Info] [" + Thread.currentThread().getName() + "] Cobertura report finished");
 				return coberturaReport;

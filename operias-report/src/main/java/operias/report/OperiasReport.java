@@ -56,6 +56,13 @@ public class OperiasReport {
 	 * A list of possible file locations
 	 */
 	private List<String> sourceLocations;
+	
+	
+	public List<String> getSourceLocations(){
+		return sourceLocations;
+	}
+	
+	
 	/**
 	 * Construct a new operias report
 	 * @param reportRepo
@@ -85,7 +92,8 @@ public class OperiasReport {
 		for(CoberturaPackage oPackage : originalReport.getPackages()) {
 			CoberturaPackage rPackage = revisedReport.getPackage(oPackage.getName());
 			
-			// If package == null, the package was deleted, so the class was deleted, or the package name was new (will be marked in next phase) so we can ignore it
+			// If package == null, the package was deleted, so the class was deleted,
+			//or the package name was new (will be marked in next phase) so we can ignore it
 			if (rPackage != null) {
 				for(CoberturaClass oClass : oPackage.getClasses()) {
 					

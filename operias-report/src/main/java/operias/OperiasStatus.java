@@ -33,6 +33,15 @@ public enum OperiasStatus {
 	ERROR_COBERTURA_TASK_EXECUTION,
 	
 	/**
+	 * There was an error during the execution of a pitest task
+	 */
+	ERROR_PITEST_TASK_CREATION,
+	
+	/**
+	 * There was an error during the execution of a pitest task
+	 */
+	ERROR_PITEST_TASK_EXECUTION,
+	/**
 	 * Error in constructing the clean task for the project
 	 
 	 */
@@ -48,6 +57,12 @@ public enum OperiasStatus {
 	 */
 	
 	ERROR_COBERTURA_TASK_OPERIAS_EXECUTION, 
+	
+	/**
+	 * Given if operias is run on it self, can create a loop
+	 */
+	
+	ERROR_PITEST_TASK_OPERIAS_EXECUTION, 
 	
 	/**
 	 * XML file was either non readable, or the path was invalid
