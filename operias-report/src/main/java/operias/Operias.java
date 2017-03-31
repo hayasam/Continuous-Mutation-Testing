@@ -30,7 +30,7 @@ public class Operias {
 	 * Construct a report based on the difference in source files and coverage between the two folders in the configuration
 	 * @return Operias instance
 	 */
-	public Operias constructReport() {
+	public Operias constructReport(String pathToPitestReport) {
 
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
 			Main.printLine("[Error] Missing either the original or the revised directory");
@@ -71,7 +71,7 @@ public class Operias {
 		report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
 		
 		System.out.println("-------------------------------------------------");
-		new OperiasMutated(report);
+		new OperiasMutated(report,pathToPitestReport);
 		System.out.println("-------------------------------------------------");
 		
 		return this;

@@ -32,18 +32,20 @@ public class Main {
 			Configuration.setUpDirectoriesThroughGit();
 		}
 		
-		new Operias().constructReport().writeHTMLReport().writeXMLReport();
+		String pathToPitestReport = "/home/ioana/TestLastCommitProject/target/pit-reports/";
+		
+		new Operias().constructReport(pathToPitestReport).writeHTMLReport().writeXMLReport();
 		
 		
 		Main.printLine("[Info] Cleaning up!");
 		// Remove temporary directory
-		/*
+		
 		try {
 			FileUtils.deleteDirectory(new File(Configuration.getTemporaryDirectory()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		*/
+		
 		Main.printLine("[Info] Execution of operias was a great success!");
 	}
 	

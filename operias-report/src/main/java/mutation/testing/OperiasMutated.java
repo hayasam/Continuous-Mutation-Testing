@@ -31,16 +31,8 @@ public class OperiasMutated {
 	private ArrayList<MutatedFile> mutatedFiles;
 	OperiasReport operiasReport;
 
-	public OperiasMutated(OperiasReport operiasReport) {
-		/*
-		if changed lines are covered by tests i.e. >50%  on every commit=for developer on PR (if feature works) forcode reviewer
-			then run pitest on last commit
-			then get mutant info on changed+covered lines 
-			then generate cmd message/git message
-		else
-			git text for developer??
+	public OperiasMutated(OperiasReport operiasReport, String pathToPitestReport) {
 		
-		*/
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
 		
