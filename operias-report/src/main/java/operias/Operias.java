@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import mutation.testing.OperiasMutated;
+import mutation.testing.OPi;
 import operias.coverage.*;
 import operias.diff.DiffReport;
 import operias.output.html.HTMLReport;
@@ -30,7 +30,7 @@ public class Operias {
 	 * Construct a report based on the difference in source files and coverage between the two folders in the configuration
 	 * @return Operias instance
 	 */
-	public Operias constructReport(String pathToPitestReport) {
+	public Operias constructReport() {
 
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
 			Main.printLine("[Error] Missing either the original or the revised directory");
@@ -70,9 +70,9 @@ public class Operias {
 		
 		report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
 		
-		System.out.println("-------------------------------------------------");
-		new OperiasMutated(report,pathToPitestReport);
-		System.out.println("-------------------------------------------------");
+		Main.printLine("[[OPi+]]----START---------------------------------------------");
+		new OPi(report);
+		Main.printLine("[[OPi+]]----END---------------------------------------------");
 		
 		return this;
 	}

@@ -15,18 +15,33 @@ public class MutatedFile {
 
 	private String systemFileName;
 	private String mutationReportPath;
+	private String commitID;
 	private ArrayList<Integer> diffCoveredLines;
 	private ArrayList<InflexionPoint> inflexionPoints;
 	
-	public MutatedFile(String fileName, ArrayList<Integer> diffCoveredLines){
+	public MutatedFile(String fileName, ArrayList<Integer> diffCoveredLines, String commitID){
 		this.diffCoveredLines = diffCoveredLines;
 		this.systemFileName = fileName;
+		this.commitID = commitID;
 	}
+	
+	
 	
 	public void setMutationReportPath(String path){
 		this.mutationReportPath = path;
 		extractMutationReport();
 	}
+	
+	
+
+	public String getSystemFileName() {
+		return systemFileName;
+	}
+	
+	public String getCommitID() {
+		return commitID;
+	}
+	
 	
 	public ArrayList<Integer> getDiffCoveredLines() {
 		return diffCoveredLines;
@@ -60,7 +75,7 @@ public class MutatedFile {
 			//actual covered content = size/2;
 			parseSetToInflexionPoints(coveredContent,diffCoveredLines);
 			
-			System.out.println("places with survived mutants "+inflexionPoints.size());
+			System.out.println("[OPi+] places with survived mutants "+inflexionPoints.size());
 			System.out.println(inflexionPoints.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -175,7 +190,7 @@ public class MutatedFile {
 	}
 	
 	public void print(){
-		System.out.println("Mutated file:.......................");
+		System.out.println("[OPi+] Mutated file:.......................");
 		System.out.println(systemFileName);
 		System.out.println(diffCoveredLines);
 		

@@ -1,0 +1,828 @@
+
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<link href='http://fonts.googleapis.com/css?family=Raleway:300' rel='stylesheet' type='text/css'>
+		<link href='css/style.css' rel='stylesheet' type='text/css'>
+		<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			$(document).ready(function() {
+				$(".testResultButton").click(function() {
+					var id = $(this).attr('id');
+					$("#testResult"+id).toggle();
+				});
+			
+				$("#showAllChanges").click(function() {
+					$("#revisedCoverageTable, #originalCoverageTable, #sourceDiffTable").hide();
+					$("#combinedTable").show();
+				});
+			
+				$("#showOriginal").click(function() {
+					$("#revisedCoverageTable, #combinedTable, #sourceDiffTable").hide();
+					$("#originalCoverageTable").show();
+				});
+				
+				$("#showNew").click(function() {
+					$("#combinedTable, #originalCoverageTable, #sourceDiffTable").hide();
+					$("#revisedCoverageTable").show();
+				});
+				
+				$("#showSourceDiff").click(function() {
+					$("#combinedTable, #originalCoverageTable, #revisedCoverageTable").hide();
+					$("#sourceDiffTable").show();
+				});
+				
+				$(".packageRow").click(function() {					
+					$(".ClassIn" + $(this).attr('id')).each(function() {
+						if ($(this).is(":visible")) {
+							hideTr($(this));
+						} else {
+							showTr($(this));
+						}
+					});
+				});
+			});
+			
+			function hideTr(tr) {
+			  tr.find('td').wrapInner('<div style="display: block;" />').parent().find('td > div').slideUp(100, function () {
+				tr.hide();
+				var $set = jQuery(this);
+				$set.replaceWith($set.contents());
+			  });
+			}
+
+			function showTr(tr) {
+			  tr.show()
+			  tr.find('td').wrapInner('<div style="display: none;" />').parent().find('td > div').slideDown(100, function() {
+				var $set = jQuery(this);
+				$set.replaceWith($set.contents());
+			  });
+			}
+		</script>
+		<title>Operias</title>
+	</head>
+	<body>
+		<header>
+			<div id="title">
+				<h1>Operias</h1>
+			</div>
+		</header>
+		<div id='legend'>
+			<h2>Legend</h2>
+			<div id="lightGreenLegend"></div><span class="legendText">Was originally covered</span>
+			<div id="darkGreenLegend"></div><span class="legendText">Is now covered in the new version</span>
+			<div id="lightRedLegend"></div><span class="legendText">Was originally not covered</span>
+			<div id="darkRedLegend"></div><span class="legendText">Is not covered anymore in the new version</span>
+			<div id="deletedSource"></div><span class="legendText">Row was deleted</span>
+			<div id="addedSource"></div><span class="legendText">Row was added</span>
+		</div><div id='breadcrumb'>
+<h2><a href='index.html'>overview</a> / BankAccount</h2>
+</div>
+<div id='informationContent'>
+  <strong>File</strong> groupID/artifactID/BankAccount.java <br />
+  <strong>Line coverage</strong> increased from 74% to 79% <br />
+  <strong>Branch coverage</strong> increased from 60% to 70% <br />
+<br/>
+<a href='javascript:void(0);' id='showOriginal'>Show the original coverage</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' id='showNew'>Show the revised coverage</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' id='showSourceDiff'>Show source differences</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' id='showAllChanges'>Show the combined changes</a></div>
+<div id='mainContent'><div id='tableContent'>
+<table id='originalCoverageTable' class='code'>
+<tr>
+ 	<td class=''>1</td>
+ 	<td class=''><pre><span class="keyword">package</span> groupID.artifactID;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>2</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class=''>3</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>4</td>
+ 	<td class='coveredLight'><pre><span class="keyword">public</span> <span class="keyword">class</span> BankAccount {</pre></td>
+</tr>
+<tr>
+ 	<td class=''>5</td>
+ 	<td class=''><pre>        <span class="keyword">private</span> <span class="keyword">double</span> balance;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>6</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>7</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> extra = <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>8</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>9</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> deposit(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>10</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">if</span> (amount    &gt;=     0.00) { </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>11</td>
+ 	<td class='coveredLight'><pre>                        balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>12</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">if</span>(balance &gt; 0.00){</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>13</td>
+ 	<td class='notCoveredLight'><pre>                                isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>14</td>
+ 	<td class=''><pre>                        }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>15</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">true</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>16</td>
+ 	<td class=''><pre>                }<span class="keyword">else</span>{ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>17</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>18</td>
+ 	<td class=''><pre>                } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>19</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>20</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>21</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>22</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> withdraw(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>23</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span> (amount &lt;= 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>24</td>
+ 	<td class='notCoveredLight'><pre>                         System.out.println(<span class="string">"amount cannot be negative"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>25</td>
+ 	<td class='notCoveredLight'><pre>                         <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>26</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class=''>27</td>
+ 	<td class=''><pre>                </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>28</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span>(isOverdraft == <span class="keyword">true</span>){</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>29</td>
+ 	<td class='notCoveredLight'><pre>                        System.out.println(<span class="string">"account is overdraft"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>30</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>31</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>32</td>
+ 	<td class='coveredLight'><pre>                balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>33</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span> (balance &lt; 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>34</td>
+ 	<td class='coveredLight'><pre>                         isOverdraft = <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>35</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>36</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">return</span> <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>37</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>38</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>39</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>40</td>
+ 	<td class=''><pre>}</pre></td>
+</tr>
+<table id='revisedCoverageTable' class='code'>
+<tr>
+ 	<td class=''>1</td>
+ 	<td class=''><pre><span class="keyword">package</span> groupID.artifactID;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>2</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class=''>3</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>4</td>
+ 	<td class='coveredLight'><pre><span class="keyword">public</span> <span class="keyword">class</span> BankAccount {</pre></td>
+</tr>
+<tr>
+ 	<td class=''>5</td>
+ 	<td class=''><pre>        <span class="keyword">private</span> <span class="keyword">double</span> balance;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>6</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>7</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> extra = <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>8</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>9</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> deposit(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>10</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">if</span> (amount    &gt;=     0.00) { </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>11</td>
+ 	<td class='coveredLight'><pre>                        balance = balance + amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>12</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">if</span>(balance &gt; 0.00){</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>13</td>
+ 	<td class='coveredLight'><pre>                                isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>14</td>
+ 	<td class=''><pre>                        }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>15</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">true</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>16</td>
+ 	<td class=''><pre>                }<span class="keyword">else</span>{ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>17</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>18</td>
+ 	<td class=''><pre>                } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>19</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>20</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>21</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>22</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> withdraw(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>23</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span> (amount &lt;= 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>24</td>
+ 	<td class='notCoveredLight'><pre>                         System.out.println(<span class="string">"amount cannot be negative"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>25</td>
+ 	<td class='notCoveredLight'><pre>                         <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>26</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class=''>27</td>
+ 	<td class=''><pre>                </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>28</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span>(isOverdraft == <span class="keyword">true</span>){</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>29</td>
+ 	<td class='notCoveredLight'><pre>                        System.out.println(<span class="string">"account is overdraft"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>30</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>31</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>32</td>
+ 	<td class='coveredLight'><pre>                balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>33</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">if</span> (balance &lt; 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>34</td>
+ 	<td class='coveredLight'><pre>                         isOverdraft = <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>35</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>36</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">return</span> <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>37</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>38</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>39</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>40</td>
+ 	<td class=''><pre>}</pre></td>
+</tr>
+<table id='sourceDiffTable'  class='code'>
+<tr>
+ 	<td>1</td>
+ 	<td>1</td>
+ 	<td><pre><span class="keyword">package</span> groupID.artifactID;</pre></td>
+</tr>
+<tr>
+ 	<td>2</td>
+ 	<td>2</td>
+ 	<td><pre></pre></td>
+</tr>
+<tr>
+ 	<td>3</td>
+ 	<td>3</td>
+ 	<td><pre></pre></td>
+</tr>
+<tr>
+ 	<td>4</td>
+ 	<td>4</td>
+ 	<td><pre><span class="keyword">public</span> <span class="keyword">class</span> BankAccount {</pre></td>
+</tr>
+<tr>
+ 	<td>5</td>
+ 	<td>5</td>
+ 	<td><pre>        <span class="keyword">private</span> <span class="keyword">double</span> balance;</pre></td>
+</tr>
+<tr>
+ 	<td>6</td>
+ 	<td>6</td>
+ 	<td><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td>7</td>
+ 	<td>7</td>
+ 	<td><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> extra = <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td>8</td>
+ 	<td>8</td>
+ 	<td><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td>9</td>
+ 	<td>9</td>
+ 	<td><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> deposit(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td>10</td>
+ 	<td>10</td>
+ 	<td><pre>                <span class="keyword">if</span> (amount    &gt;=     0.00) { </pre></td>
+</tr>
+<tr>
+ 	<td class='deletedRow'>11</td>
+ 	<td class='deletedRow'></td>
+ 	<td class='deletedRow'><pre>			balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='left bottom top'></td>
+ 	<td class=' bottom top'>11</td>
+ 	<td class='right bottom top'><pre>                        balance = balance + amount;</pre></td>
+</tr>
+<tr>
+ 	<td>12</td>
+ 	<td>12</td>
+ 	<td><pre>                        <span class="keyword">if</span>(balance &gt; 0.00){</pre></td>
+</tr>
+<tr>
+ 	<td>13</td>
+ 	<td>13</td>
+ 	<td><pre>                                isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td>14</td>
+ 	<td>14</td>
+ 	<td><pre>                        }</pre></td>
+</tr>
+<tr>
+ 	<td>15</td>
+ 	<td>15</td>
+ 	<td><pre>                        <span class="keyword">return</span> <span class="keyword">true</span>; </pre></td>
+</tr>
+<tr>
+ 	<td>16</td>
+ 	<td>16</td>
+ 	<td><pre>                }<span class="keyword">else</span>{ </pre></td>
+</tr>
+<tr>
+ 	<td>17</td>
+ 	<td>17</td>
+ 	<td><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td>18</td>
+ 	<td>18</td>
+ 	<td><pre>                } </pre></td>
+</tr>
+<tr>
+ 	<td>19</td>
+ 	<td>19</td>
+ 	<td><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td>20</td>
+ 	<td>20</td>
+ 	<td><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td>21</td>
+ 	<td>21</td>
+ 	<td><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td>22</td>
+ 	<td>22</td>
+ 	<td><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> withdraw(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td>23</td>
+ 	<td>23</td>
+ 	<td><pre>                <span class="keyword">if</span> (amount &lt;= 0){ </pre></td>
+</tr>
+<tr>
+ 	<td>24</td>
+ 	<td>24</td>
+ 	<td><pre>                         System.out.println(<span class="string">"amount cannot be negative"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td>25</td>
+ 	<td>25</td>
+ 	<td><pre>                         <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td>26</td>
+ 	<td>26</td>
+ 	<td><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td>27</td>
+ 	<td>27</td>
+ 	<td><pre>                </pre></td>
+</tr>
+<tr>
+ 	<td>28</td>
+ 	<td>28</td>
+ 	<td><pre>                <span class="keyword">if</span>(isOverdraft == <span class="keyword">true</span>){</pre></td>
+</tr>
+<tr>
+ 	<td>29</td>
+ 	<td>29</td>
+ 	<td><pre>                        System.out.println(<span class="string">"account is overdraft"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td>30</td>
+ 	<td>30</td>
+ 	<td><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td>31</td>
+ 	<td>31</td>
+ 	<td><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td>32</td>
+ 	<td>32</td>
+ 	<td><pre>                balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td>33</td>
+ 	<td>33</td>
+ 	<td><pre>                <span class="keyword">if</span> (balance &lt; 0){ </pre></td>
+</tr>
+<tr>
+ 	<td>34</td>
+ 	<td>34</td>
+ 	<td><pre>                         isOverdraft = <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td>35</td>
+ 	<td>35</td>
+ 	<td><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td>36</td>
+ 	<td>36</td>
+ 	<td><pre>                <span class="keyword">return</span> <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td>37</td>
+ 	<td>37</td>
+ 	<td><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td>38</td>
+ 	<td>38</td>
+ 	<td><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td>39</td>
+ 	<td>39</td>
+ 	<td><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td>40</td>
+ 	<td>40</td>
+ 	<td><pre>}</pre></td>
+</tr>
+</table>
+<table id='combinedTable' class='code'>
+<tr>
+ 	<td class=''>1</td>
+ 	<td class=''>1</td>
+ 	<td class=''><pre><span class="keyword">package</span> groupID.artifactID;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>2</td>
+ 	<td class=''>2</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class=''>3</td>
+ 	<td class=''>3</td>
+ 	<td class=''><pre></pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>4</td>
+ 	<td class='coveredLight'>4</td>
+ 	<td class='coveredLight'><pre><span class="keyword">public</span> <span class="keyword">class</span> BankAccount {</pre></td>
+</tr>
+<tr>
+ 	<td class=''>5</td>
+ 	<td class=''>5</td>
+ 	<td class=''><pre>        <span class="keyword">private</span> <span class="keyword">double</span> balance;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>6</td>
+ 	<td class='coveredLight'>6</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>7</td>
+ 	<td class='coveredLight'>7</td>
+ 	<td class='coveredLight'><pre>        <span class="keyword">private</span> <span class="keyword">boolean</span> extra = <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>8</td>
+ 	<td class=''>8</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>9</td>
+ 	<td class=''>9</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> deposit(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>10</td>
+ 	<td class='coveredLight'>10</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">if</span> (amount    &gt;=     0.00) { </pre></td>
+</tr>
+<tr>
+ 	<td class='deletedRow coveredLight'>11</td>
+ 	<td class='deletedRow coveredLight'></td>
+ 	<td class='deletedRow coveredLight'><pre>			balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredDark left bottom top'></td>
+ 	<td class='coveredDark bottom top'>11</td>
+ 	<td class='coveredDark right bottom top'><pre>                        balance = balance + amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>12</td>
+ 	<td class='notCoveredLight'>12</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">if</span>(balance &gt; 0.00){</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredDark'>13</td>
+ 	<td class='coveredDark'>13</td>
+ 	<td class='coveredDark'><pre>                                isOverdraft = <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>14</td>
+ 	<td class=''>14</td>
+ 	<td class=''><pre>                        }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>15</td>
+ 	<td class='coveredLight'>15</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">true</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>16</td>
+ 	<td class=''>16</td>
+ 	<td class=''><pre>                }<span class="keyword">else</span>{ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>17</td>
+ 	<td class='coveredLight'>17</td>
+ 	<td class='coveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>18</td>
+ 	<td class=''>18</td>
+ 	<td class=''><pre>                } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>19</td>
+ 	<td class=''>19</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>20</td>
+ 	<td class=''>20</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>21</td>
+ 	<td class=''>21</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>22</td>
+ 	<td class=''>22</td>
+ 	<td class=''><pre>        <span class="keyword">public</span> <span class="keyword">boolean</span> withdraw(<span class="keyword">double</span> amount) {</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>23</td>
+ 	<td class='notCoveredLight'>23</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span> (amount &lt;= 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>24</td>
+ 	<td class='notCoveredLight'>24</td>
+ 	<td class='notCoveredLight'><pre>                         System.out.println(<span class="string">"amount cannot be negative"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>25</td>
+ 	<td class='notCoveredLight'>25</td>
+ 	<td class='notCoveredLight'><pre>                         <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>26</td>
+ 	<td class=''>26</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class=''>27</td>
+ 	<td class=''>27</td>
+ 	<td class=''><pre>                </pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>28</td>
+ 	<td class='notCoveredLight'>28</td>
+ 	<td class='notCoveredLight'><pre>                <span class="keyword">if</span>(isOverdraft == <span class="keyword">true</span>){</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>29</td>
+ 	<td class='notCoveredLight'>29</td>
+ 	<td class='notCoveredLight'><pre>                        System.out.println(<span class="string">"account is overdraft"</span>);</pre></td>
+</tr>
+<tr>
+ 	<td class='notCoveredLight'>30</td>
+ 	<td class='notCoveredLight'>30</td>
+ 	<td class='notCoveredLight'><pre>                        <span class="keyword">return</span> <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>31</td>
+ 	<td class=''>31</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>32</td>
+ 	<td class='coveredLight'>32</td>
+ 	<td class='coveredLight'><pre>                balance = balance - amount;</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredDark'>33</td>
+ 	<td class='coveredDark'>33</td>
+ 	<td class='coveredDark'><pre>                <span class="keyword">if</span> (balance &lt; 0){ </pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>34</td>
+ 	<td class='coveredLight'>34</td>
+ 	<td class='coveredLight'><pre>                         isOverdraft = <span class="keyword">false</span>; </pre></td>
+</tr>
+<tr>
+ 	<td class=''>35</td>
+ 	<td class=''>35</td>
+ 	<td class=''><pre>                }</pre></td>
+</tr>
+<tr>
+ 	<td class='coveredLight'>36</td>
+ 	<td class='coveredLight'>36</td>
+ 	<td class='coveredLight'><pre>                <span class="keyword">return</span> <span class="keyword">true</span>;</pre></td>
+</tr>
+<tr>
+ 	<td class=''>37</td>
+ 	<td class=''>37</td>
+ 	<td class=''><pre>        } </pre></td>
+</tr>
+<tr>
+ 	<td class=''>38</td>
+ 	<td class=''>38</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>39</td>
+ 	<td class=''>39</td>
+ 	<td class=''><pre>        </pre></td>
+</tr>
+<tr>
+ 	<td class=''>40</td>
+ 	<td class=''>40</td>
+ 	<td class=''><pre>}</pre></td>
+</tr>
+</table>
+</div></div>
+
+		<footer>&copy; Operias 2013</footer>
+	</body>
+</html>

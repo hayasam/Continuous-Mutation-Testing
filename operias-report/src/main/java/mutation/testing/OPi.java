@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.errors.SymlinksNotSupportedException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,95 +27,62 @@ import operias.report.change.DeleteSourceChange;
 import operias.report.change.InsertSourceChange;
 import operias.report.change.OperiasChange;
 
-public class OperiasMutated {
+public class OPi {
 	
 	private ArrayList<MutatedFile> mutatedFiles;
 	OperiasReport operiasReport;
 
-	public OperiasMutated(OperiasReport operiasReport, String pathToPitestReport) {
+	public OPi(OperiasReport operiasReport) {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
 		
-		List<OperiasFile> operiasFiles = operiasReport.getChangedClasses();
-		//System.out.println("Number of files changed: "+operiasFiles.size());  //1
-		for(OperiasFile operiasFile : operiasFiles){
-			ArrayList<Integer> diffCoveredLines = parseOperiasFile(operiasFile);
+		List<OperiasFile> filesChanged = operiasReport.getChangedClasses();
+		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size());  
+		for(OperiasFile currentFileChanged : filesChanged){
+			ArrayList<Integer> diffCoveredLines = parseOperiasFile(currentFileChanged);
+			String currentFileName = currentFileChanged.getSourceDiff().getFileName(operiasReport);
 			if(diffCoveredLines.size()>0){
-				mutatedFiles.add(new MutatedFile(operiasFile.getSourceDiff().getFileName(operiasReport), diffCoveredLines));
+				mutatedFiles.add(new MutatedFile(currentFileName, diffCoveredLines, Configuration.getRevisedCommitID()));
+				Main.printLine("[OPi+] Pipeline: I have changed and covered by tests lines in file "+currentFileName); 
 			}
 		}
 		
 		
-		//TODO run pitest on last commit
-		if(mutatedFiles.size()>0){
-			//System.out.println("Current Working Directory = " +System.getProperty("user.dir"));			
+		Main.printLine("[OPi+] Pipeline: Number of files mutated: "+mutatedFiles.size()); 
+		if(mutatedFiles.size()>0){			
 			//TODO 3 is an assumption for operias
 			String path = operiasReport.getSourceLocations().get(3);
 			int tempLocation = path.indexOf("temp");
-			String pathToNewVersionPom =  (String) path.subSequence(0, tempLocation+18);
-			System.out.println("!!!!!!!!   "+pathToNewVersionPom);
-			//executePitestTask(System.getProperty("user.dir"));
-			
-			//processMutatedCommit();
+			String newVersionPomPath =  (String) path.subSequence(0, tempLocation+18);
+			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID());
+			processMutatedCommit(pitestReportsPath);
 			
 		}else{
 			//TODO message for no code to mutate
-			Main.printLine("[Mutated Operias Info] There are NO changed code lines that are also covered by the test suite");
+			//this scenario is not usefull for the Evaluation step => it should just output the old Operias report
+			Main.printLine("[OPi+][BLUE-1] There are NO changed code lines that are also covered by the test suite");
 		}
 		
 	}
 
-	private boolean executePitestTask(String directory) throws IOException, InterruptedException {
-		boolean executionSucceeded = false;
+	
 
-		File pomXML = new File(directory, "pom.xml");
-		String  firstString = null, secondString = null;
+	private void processMutatedCommit(String pitestReportsPath) {
 		
-		try {
-			firstString = (new File(directory)).getCanonicalPath();
-			secondString = (new File("")).getCanonicalPath();
-		} catch (Exception e) {
-			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Error creating pitest task");
-			System.exit(OperiasStatus.ERROR_PITEST_TASK_CREATION.ordinal());
-		}
-		
-		if (firstString.equals(secondString)) {
-			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Cannot execute pitest on operias, infinite loop!");
-			System.exit(OperiasStatus.ERROR_PITEST_TASK_OPERIAS_EXECUTION.ordinal());
-		}
-		
-		//get temp location of revised version of system
-		//mvn cobertura:cobertura -Dcobertura.report.format=xml -f directory on the target directory
-		
-		ProcessBuilder builder = new ProcessBuilder("mvn","clean", "cobertura:cobertura", "-Dcobertura.aggregate=true", "-Dcobertura.report.format=xml", "-f", pomXML.getAbsolutePath());
-
-		Process process = null;
-		process = builder.start();
-		
-		process.waitFor();
-
-		int exitValue = process.exitValue();
-		process.destroy();
-
-		executionSucceeded = exitValue == 0;
-		
-		if (executionSucceeded) {
-
-			Main.printLine("[Info] [" + Thread.currentThread().getName() + "] Succesfully executed cobertura");
-		} else {
-			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Error executing cobertura, exit value: " + exitValue);
-		}
-		return executionSucceeded;	
-		
-	}
-
-	private void processMutatedCommit() {
 		for(MutatedFile currentMutatedFile : mutatedFiles){
-			String fileMutationReportPath = "BankAccount.java.html";
-			
+			System.out.println("[OPi+][INFO] Processing each file in commit "+currentMutatedFile.getCommitID());
 			//TODO extract exact location of pitest report for currentMutatedFile
-			currentMutatedFile.setMutationReportPath(fileMutationReportPath);	
+			
+			System.out.println("my path for pitest reports is "+pitestReportsPath);
+			System.out.println("the file that was changed in the same commit is: "+currentMutatedFile.getSystemFileName());
+			System.out.println("this file was changed in commit "+currentMutatedFile.getCommitID());
+			
+			// /tmp/TestGitRepository6589134661357336768/target/pit-reports/201704041512/groupID.artifactID/BankAccount.java.html
+			
+			String currentPitestReport = pitestReportsPath;
+			currentMutatedFile.setMutationReportPath(currentPitestReport);	
+			System.out.println("path for current file: "+currentPitestReport);
 		}
 	}
 
@@ -129,33 +97,34 @@ public class OperiasMutated {
 		//System.out.println("Looking at changes in: "+operiasFile.getSourceDiff().getFileName(operiasReport)); 
 		//System.out.println("with "+noChangeBlocksInFile+" changed blocks in file");
 		for(OperiasChange currentChange : changedBlocksinFile){
-			diffCoveredLines = processChange(currentChange,diffCoveredLines,operiasFile);
+			diffCoveredLines.addAll(processChange(currentChange,operiasFile)) ;
 		}
 		return diffCoveredLines;
 	}
 
-	private ArrayList<Integer> processChange(OperiasChange currentChange, ArrayList<Integer> diffCoveredLines, OperiasFile operiasFile) {
+	private ArrayList<Integer> processChange(OperiasChange currentChange, OperiasFile operiasFile) {
+		
+		ArrayList<Integer> diffCoveredLines = new ArrayList<Integer>();
 		if(currentChange instanceof ChangeSourceChange || currentChange instanceof InsertSourceChange){
-			//System.out.println("updated code "+currentChange.getSourceDiffDelta().getRevised().getPosition());
 			int firstLineAdded = currentChange.getSourceDiffDelta().getRevised().getPosition();
-			int lastLineAdded = firstLineAdded + operiasFile.getSourceDiff().getAddedLinesCount()-2; //21+17
-			//TODO -1 for previous example. -2 for this example. obs: might be difernt for update and change; maybe use getSourceDiffDelta or size of revisedCoverage
+			int lastLineAdded = firstLineAdded +currentChange.getSourceDiffDelta().getRevised().getLines().size() -1;
+					
+					
+			//TODO  obs: might be difernt for update and change; maybe use size of revisedCoverage
 			
-			List<Boolean> codeChunkAdded = currentChange.getRevisedCoverage();	
-			
-			//System.out.println(currentChange.getRevisedCoverage());
-			//System.out.println(currentChange.getSourceDiffDelta());
-			
-			
-			for(int i = firstLineAdded; i<lastLineAdded; i++){
+			List<Boolean> codeChunkAdded = currentChange.getRevisedCoverage();
+			System.out.println("in the current change there are "+currentChange.getRevisedCoverage().size()+" lines affected");
+			for(int i = firstLineAdded; i<=lastLineAdded; i++){
+				
 				if(codeChunkAdded.get(i-firstLineAdded)!=null && codeChunkAdded.get(i-firstLineAdded))
-					diffCoveredLines.add(i+1);//TODO check how pitest looks at the code lines, with +1 we have the new line numbering starting from 1
+					diffCoveredLines.add(i+1);//TODO ?check how pitest looks at the code lines, with +1 we have the new line numbering starting from 1
+					System.out.println("[OPi+][INFO] A line that changed and covered is in new version at: "+(i+1));
 			}
-			System.out.println("We have "+ diffCoveredLines.size()+" lines to mutate");
-			System.out.println("The lines that are covered AND changed are: "+ diffCoveredLines.toString());
+			System.out.println("[OPi+] We have "+ diffCoveredLines.size()+" lines to mutate");
+			System.out.println("[OPi+] The lines that are covered AND changed are: "+ diffCoveredLines.toString());
 			
 		}else if(currentChange instanceof DeleteSourceChange){
-			System.out.println("code was deleted "+currentChange.getSourceDiffDelta().getOriginal().getPosition());
+			System.out.println("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition()+" for " +currentChange.getSourceDiffDelta().getRevised().size()+" rows");
 			//TODO this information has to be processed. it does not give correct line number for latter lines
 			
 		}else {

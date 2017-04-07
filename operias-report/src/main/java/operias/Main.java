@@ -21,20 +21,16 @@ public class Main {
 	 * 
 	 */
 	public static void main(String[] args) {
-		
-		
-		
+				
 		Configuration.parseArguments(args);
-		
 		// Check if the directories were set
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
 			// if not, try to set up directories through git
 			Configuration.setUpDirectoriesThroughGit();
 		}
 		
-		String pathToPitestReport = "/home/ioana/TestLastCommitProject/target/pit-reports/";
 		
-		new Operias().constructReport(pathToPitestReport).writeHTMLReport().writeXMLReport();
+		new Operias().constructReport().writeHTMLReport().writeXMLReport();
 		
 		
 		Main.printLine("[Info] Cleaning up!");
@@ -49,8 +45,30 @@ public class Main {
 		Main.printLine("[Info] Execution of operias was a great success!");
 	}
 	
-	
-	
+	public static void mutatedOperias(String[] args){
+		
+		Configuration.parseArguments(args);
+		// Check if the directories were set
+		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
+			// if not, try to set up directories through git
+			Configuration.setUpDirectoriesThroughGit();
+		}
+		
+		new Operias().constructReport().writeHTMLReport().writeXMLReport();
+		
+		
+		Main.printLine("[Info] Cleaning up!");
+		// Remove temporary directory
+		
+		try {
+			FileUtils.deleteDirectory(new File(Configuration.getTemporaryDirectory()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		Main.printLine("[Info] Execution of mutated operias was a great success!");
+		
+	}
 	
 	/**
 	 * Print a line to the console, it will only be printed if the verbose argument was given
