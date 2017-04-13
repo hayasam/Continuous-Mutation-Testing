@@ -52,9 +52,11 @@ public class OPi {
 		Main.printLine("[OPi+] Pipeline: Number of files mutated: "+mutatedFiles.size()); 
 		if(mutatedFiles.size()>0){			
 			//TODO 3 is an assumption for operias
-			String path = operiasReport.getSourceLocations().get(3);
-			int tempLocation = path.indexOf("temp");
-			String newVersionPomPath =  (String) path.subSequence(0, tempLocation+18);
+			//String path = operiasReport.getSourceLocations().get(3);
+			//int tempLocation = path.indexOf("temp");
+			//String newVersionPomPath =  (String) path.subSequence(0, tempLocation+18);
+			
+			Main.printLine("[OPi+][INFO] Start processing the commited changes");
 			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID());
 			processMutatedCommit(pitestReportsPath);
 			
@@ -76,7 +78,6 @@ public class OPi {
 			
 			System.out.println("my path for pitest reports is "+pitestReportsPath);
 			System.out.println("the file that was changed in the same commit is: "+currentMutatedFile.getSystemFileName());
-			System.out.println("this file was changed in commit "+currentMutatedFile.getCommitID());
 			
 			// /tmp/TestGitRepository6589134661357336768/target/pit-reports/201704041512/groupID.artifactID/BankAccount.java.html
 			

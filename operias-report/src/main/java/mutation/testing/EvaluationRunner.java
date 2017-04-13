@@ -25,16 +25,18 @@ public class EvaluationRunner {
 		//get commits to analyze
 		ArrayList<String>  commits = GitProxy.getFilteredCommits();
 		
-		
 		//for each commit start the process
 		for(String commitID: commits){
-			runOperiasMutated(REMOTE_URL, GitProxy.previousCommit.get(commitID), commitID);
+			try {
+				runOperiasMutated(REMOTE_URL, GitProxy.previousCommit.get(commitID), commitID);
+			} catch (ExitRequiredException e) {
+				System.out.println("------------------------------------------------Operias crashed for commit: "+commitID);
+				e.printStackTrace();
+			}
 		}
-		
-		
 	}
 
-	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) {
+	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) throws ExitRequiredException{
 				
 		String[] arguments = { "-oru", repoLink,
 							   "-rru", repoLink,

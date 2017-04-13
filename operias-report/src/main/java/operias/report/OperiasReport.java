@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import mutation.testing.ExitRequiredException;
 import operias.Main;
 import operias.coverage.CoberturaClass;
 import operias.coverage.CoberturaPackage;
@@ -69,7 +70,7 @@ public class OperiasReport {
 	 * @param reportSource
 	 * @param reportFileDiff
 	 */
-	public OperiasReport(CoverageReport originalReport, CoverageReport revisedReport, DiffReport sourceDiffReport) {
+	public OperiasReport(CoverageReport originalReport, CoverageReport revisedReport, DiffReport sourceDiffReport) throws ExitRequiredException {
 		this.originalReport = originalReport;
 		this.revisedReport = revisedReport;
 		this.sourceDiffReport = sourceDiffReport;
@@ -77,10 +78,14 @@ public class OperiasReport {
 		this.changedTests = new LinkedList<DiffFile>();
 		
 		// Combine all sources from both the original and revised reports
-		sourceLocations = new ArrayList<String>(originalReport.getSources());
-		sourceLocations.addAll(revisedReport.getSources());
+		if(originalReport!=null){
+			sourceLocations = new ArrayList<String>(originalReport.getSources());
+			sourceLocations.addAll(revisedReport.getSources());
+			ParseReport();
+		}else{
+			throw new ExitRequiredException("the reports were not created");
+		}
 		
-		ParseReport();
 	}
 	
 	/**

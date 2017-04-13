@@ -15,6 +15,8 @@ import operias.report.change.InsertSourceChange;
 
 import org.junit.Test;
 
+import mutation.testing.ExitRequiredException;
+
 public class OperiasReportTest {
 
 	/**
@@ -31,7 +33,13 @@ public class OperiasReportTest {
 			fail();
 		}
 		
-		OperiasReport report = new OperiasReport(originalCoverage, revisedCoverage, diffReport);
+		OperiasReport report = null;
+		try {
+			report = new OperiasReport(originalCoverage, revisedCoverage, diffReport);
+		} catch (ExitRequiredException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		LinkedList<OperiasFile> changedClasses = (LinkedList<OperiasFile>)report.getChangedClasses();
 			

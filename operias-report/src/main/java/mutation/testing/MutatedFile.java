@@ -9,6 +9,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import operias.Main;
 import operias.report.OperiasFile;
 
 public class MutatedFile {
@@ -23,12 +24,16 @@ public class MutatedFile {
 		this.diffCoveredLines = diffCoveredLines;
 		this.systemFileName = fileName;
 		this.commitID = commitID;
+		inflexionPoints = new ArrayList<InflexionPoint>();
 	}
 	
 	
 	
 	public void setMutationReportPath(String path){
-		this.mutationReportPath = path;
+		String[] tokens = systemFileName.split("/");
+		String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
+		this.mutationReportPath = mutationReportPath;
+		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
 		extractMutationReport();
 	}
 	
@@ -68,15 +73,13 @@ public class MutatedFile {
 			
 			//TODO talk about lines that are changed but not covered => add warning	
 			
-			//if line is changed && covegred add to difflines
-			//get diff lines
-			ArrayList<Integer> diffCoveredLines = getDiffCoveredLines();
-			
 			//actual covered content = size/2;
-			parseSetToInflexionPoints(coveredContent,diffCoveredLines);
+			parseSetToInflexionPoints(noTestCoverageContent,diffCoveredLines);
 			
-			System.out.println("[OPi+] places with survived mutants "+inflexionPoints.size());
-			System.out.println(inflexionPoints.toString());
+		
+			Main.printLine("[OPi+][INFO] Total number of inflexion points: "+inflexionPoints.size());	
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
@@ -89,13 +92,19 @@ public class MutatedFile {
 			if(diffCoveredLines.contains(codeLineNumber)){
 				//process mutants for this line of code (changed and also covered)
 				Element mutationInfo = content.get(counter).nextElementSibling();
-				ArrayList<Mutation> mutants = new ArrayList<Mutation>();
+				ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
 				if(!mutationInfo.text().isEmpty()){  //line has mutants
-					mutants = processMutantsInfo(mutationInfo.text());
+					survivingMutants = processMutantsInfo(mutationInfo.text());
+					counter++;
+					String codeLine = content.get(counter).text();
+					inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, survivingMutants));
+					Main.printLine("[OPi+][BLUE-5] created new inflexion point "+codeLineNumber);
+					
+				}else{
+					counter++;
+					//TODO expand this to blue 2 and blue 3
+					Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+codeLineNumber+"   "+content.get(counter).ownText());
 				}
-				counter++;
-				String codeLine = content.get(counter).text();
-				inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, mutants));
 			}else{
 				counter++;
 			}
@@ -114,17 +123,17 @@ public class MutatedFile {
 		for(int i=1; i<descriptions.length;i++){
 			String description = descriptions[i];
 			String status;
-			if(description.contains("SURVIVED"))
+			if(description.contains("SURVIVED")){
 				status = "SURVIVED";
-			else{
+				int startOfDescription = description.indexOf(":")+1;
+				int endOfDescription = description.indexOf(status)-3;
+				String mutantDescription = description.substring(startOfDescription, endOfDescription);
+				String mutantName = parseDescriptionToMutantName(description);
+				mutations.add(new Mutation(mutantName, mutantDescription, status));
+			}else{
 				status = "KILLED";
 			}
-			
-			int startOfDescription = description.indexOf(":")+1;
-			int endOfDescription = description.indexOf(status)-3;
-			String mutantDescription = description.substring(startOfDescription, endOfDescription);
-			String mutantName = parseDescriptionToMutantName(description);
-			mutations.add(new Mutation(mutantName, mutantDescription, status));
+			//OBS: i do not record killed mutants. not in the scope of this exercise
 		}
 		return mutations;
 	}

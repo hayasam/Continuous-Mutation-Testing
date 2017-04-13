@@ -169,7 +169,7 @@ public class OperiasFile {
 				// Lines found, compare!
 				if (originalLine.isCondition() ^ revisedLine.isCondition()) {
 					// Again something went wrong i suppose... no change in the line, so is either should both be conditions or not
-					System.exit(OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON.ordinal());				
+					//System.exit(OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON.ordinal());				
 				}
 				
 				if (!originalLine.isCovered() && revisedLine.isCovered()) {

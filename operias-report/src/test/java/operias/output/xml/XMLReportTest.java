@@ -22,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
+import mutation.testing.ExitRequiredException;
+
 public class XMLReportTest {
 
 	CoverageReport originalCoverage,revisedCoverage ;
@@ -62,12 +64,14 @@ public class XMLReportTest {
 			fail();
 		}
 		
-		OperiasReport report = new OperiasReport(originalCoverage, revisedCoverage, diffReport);
-		
-		XMLReport xmlReport = new XMLReport(report);
-		
+		OperiasReport report;
 		try {
+			report = new OperiasReport(originalCoverage, revisedCoverage, diffReport);
+			XMLReport xmlReport = new XMLReport(report);
 			xmlReport.generateReport();
+		} catch (ExitRequiredException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		} catch (ParserConfigurationException e) {
 			fail(e.getMessage());
 		} catch (TransformerException e) {

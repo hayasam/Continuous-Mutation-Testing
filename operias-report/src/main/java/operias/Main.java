@@ -5,6 +5,10 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
+import mutation.testing.ExitRequiredException;
+import mutation.testing.GitProxy;
+import operias.test.general.ExitException;
+
 /**
  * Main class of operias
  * @author soosterwaal
@@ -20,32 +24,9 @@ public class Main {
 	 
 	 * 
 	 */
-	public static void main(String[] args) {
-				
-		Configuration.parseArguments(args);
-		// Check if the directories were set
-		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
-			// if not, try to set up directories through git
-			Configuration.setUpDirectoriesThroughGit();
-		}
-		
-		
-		new Operias().constructReport().writeHTMLReport().writeXMLReport();
-		
-		
-		Main.printLine("[Info] Cleaning up!");
-		// Remove temporary directory
-		
-		try {
-			FileUtils.deleteDirectory(new File(Configuration.getTemporaryDirectory()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		Main.printLine("[Info] Execution of operias was a great success!");
-	}
 	
-	public static void mutatedOperias(String[] args){
+	
+	public static void mutatedOperias(String[] args) throws ExitRequiredException{
 		
 		Configuration.parseArguments(args);
 		// Check if the directories were set
@@ -55,7 +36,7 @@ public class Main {
 		}
 		
 		new Operias().constructReport().writeHTMLReport().writeXMLReport();
-		
+				
 		
 		Main.printLine("[Info] Cleaning up!");
 		// Remove temporary directory
@@ -66,7 +47,8 @@ public class Main {
 			e.printStackTrace();
 		}
 		
-		Main.printLine("[Info] Execution of mutated operias was a great success!");
+		GitProxy.deleteTempFolder();
+		Main.printLine("[OPi+][Info] Execution of mutated operias was a great success!");
 		
 	}
 	
@@ -78,5 +60,10 @@ public class Main {
 		if(Configuration.isOutputEnabled()) {
 			System.out.println(line);
 		}
+	}
+
+	public static void main(String[] arguments) {
+		// TODO Auto-generated method stub
+		
 	}
 }
