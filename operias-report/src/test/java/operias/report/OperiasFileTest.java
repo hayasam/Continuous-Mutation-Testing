@@ -26,6 +26,7 @@ import difflib.Chunk;
 import difflib.DeleteDelta;
 import difflib.Delta;
 import difflib.InsertDelta;
+import mutation.testing.ExitRequiredException;
 
 public class OperiasFileTest {
 
@@ -59,7 +60,10 @@ public class OperiasFileTest {
 		
 		DiffFile sourceDiff = new DiffFile("simple/Simple.java", "simple/Simple.java", 3, 3);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		LinkedList<OperiasChange> changes = (LinkedList<OperiasChange>) oFile.getChanges();
 		
@@ -67,7 +71,9 @@ public class OperiasFileTest {
 		assertTrue(changes.getFirst() instanceof CoverageIncreaseChange);
 		assertEquals(2, changes.getFirst().getOriginalLineNumber());
 		assertEquals(2, changes.getFirst().getRevisedLineNumber());
-		
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -92,7 +98,10 @@ public class OperiasFileTest {
 		
 		DiffFile sourceDiff = new DiffFile("simple/Simple.java", "simple/Simple.java", 3,3);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		LinkedList<OperiasChange> changes = (LinkedList<OperiasChange>) oFile.getChanges();
 		
@@ -100,6 +109,9 @@ public class OperiasFileTest {
 		assertTrue(changes.getFirst() instanceof CoverageDecreaseChange);
 		assertEquals(2, changes.getFirst().getOriginalLineNumber());
 		assertEquals(2, changes.getFirst().getRevisedLineNumber());
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -126,7 +138,10 @@ public class OperiasFileTest {
 		
 		DiffFile sourceDiff = new DiffFile("simple/Simple.java","simple/Simple.java", 3, 3);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		LinkedList<OperiasChange> changes = (LinkedList<OperiasChange>) oFile.getChanges();
 		
@@ -134,6 +149,9 @@ public class OperiasFileTest {
 		assertTrue(changes.getFirst() instanceof CoverageIncreaseChange);
 		assertEquals(2, changes.getFirst().getOriginalLineNumber());
 		assertEquals(2, changes.getFirst().getRevisedLineNumber());
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -158,7 +176,10 @@ public class OperiasFileTest {
 		
 		DiffFile sourceDiff = new DiffFile("simple/Simple.java", "simple/Simple.java", 3, 3);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		LinkedList<OperiasChange> changes = (LinkedList<OperiasChange>) oFile.getChanges();
 		
@@ -166,6 +187,9 @@ public class OperiasFileTest {
 		assertTrue(changes.getFirst() instanceof CoverageDecreaseChange);
 		assertEquals(2, changes.getFirst().getOriginalLineNumber());
 		assertEquals(2, changes.getFirst().getRevisedLineNumber());
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	
 	}
 	
@@ -190,11 +214,18 @@ public class OperiasFileTest {
 
 		DiffFile sourceDiff = new DiffFile("simple/Simple.java", "simple/Simple.java", 3, 3);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		LinkedList<OperiasChange> changes = (LinkedList<OperiasChange>) oFile.getChanges();
 		
 		assertEquals(0, changes.size());
+		
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -224,7 +255,9 @@ public class OperiasFileTest {
 		} catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Invalid line comparison", OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON.ordinal(), e.status);
-	    }
+	    } catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 		
 		assertTrue(exceptionThrown);
 		System.setSecurityManager(null);
@@ -253,7 +286,9 @@ public class OperiasFileTest {
 		} catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Invalid line comparison", OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON.ordinal(), e.status);
-	    }
+	    } catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 		
 		assertTrue(exceptionThrown);
 		System.setSecurityManager(null);
@@ -299,7 +334,10 @@ public class OperiasFileTest {
 		revisedClass.addLine(line4);
 		revisedClass.addLine(line6_1);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		assertEquals(1, oFile.getChanges().size());
 		assertTrue(oFile.getChanges().getFirst() instanceof InsertSourceChange);
@@ -308,6 +346,9 @@ public class OperiasFileTest {
 		assertTrue(oFile.getChanges().getFirst().getRevisedCoverage().get(0));
 		assertFalse(oFile.getChanges().getFirst().getRevisedCoverage().get(1));
 		assertNull(oFile.getChanges().getFirst().getRevisedCoverage().get(2));
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -350,7 +391,10 @@ public class OperiasFileTest {
 		originalClass.addLine(line4);
 		originalClass.addLine(line6_1);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, sourceDiff);
+		
 		
 		assertEquals(1, oFile.getChanges().size());
 		assertTrue(oFile.getChanges().getFirst() instanceof DeleteSourceChange);
@@ -359,6 +403,9 @@ public class OperiasFileTest {
 		assertTrue(oFile.getChanges().getFirst().getOriginalCoverage().get(0));
 		assertFalse(oFile.getChanges().getFirst().getOriginalCoverage().get(1));
 		assertNull(oFile.getChanges().getFirst().getOriginalCoverage().get(2));
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -398,7 +445,10 @@ public class OperiasFileTest {
 		revisedClass.addLine(liner_5);
 		revisedClass.addLine(liner_6);
 		
-		OperiasFile oFile = new OperiasFile(originalClass, revisedClass, dFile);
+		OperiasFile oFile;
+		try {
+			oFile = new OperiasFile(originalClass, revisedClass, dFile);
+		
 		
 		assertEquals(1, oFile.getChanges().size());
 		assertTrue(oFile.getChanges().getFirst() instanceof ChangeSourceChange);
@@ -410,6 +460,9 @@ public class OperiasFileTest {
 		assertNull(oFile.getChanges().getFirst().getRevisedCoverage().get(0));
 		assertFalse(oFile.getChanges().getFirst().getRevisedCoverage().get(1));
 		assertTrue(oFile.getChanges().getFirst().getRevisedCoverage().get(2));
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -427,7 +480,9 @@ public class OperiasFileTest {
 		} catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Invalid line comparison", OperiasStatus.ERROR_OPERIAS_DIFF_INVALID_CLASS_COMPARISON.ordinal(), e.status);
-	    }	
+	    }	catch (ExitRequiredException e){
+	    	e.printStackTrace();
+	    }
 		assertTrue(exceptionThrown);
 		System.setSecurityManager(null);
 	}

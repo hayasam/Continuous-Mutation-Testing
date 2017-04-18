@@ -28,7 +28,7 @@ public class Operias {
 	
 	DiffReport reportFileDiff;
 	
-	boolean clock = true;
+	static boolean clock = true;
 	
 	Thread reportRevisedThread, reportOriginalThread, reportFileDiffThread;
 	/**
@@ -73,6 +73,7 @@ public class Operias {
 		
 
 		Main.printLine("[Info] Starting threads");
+		clock = true;
 		
 		reportRevisedThread.start();
 		reportOriginalThread.start();

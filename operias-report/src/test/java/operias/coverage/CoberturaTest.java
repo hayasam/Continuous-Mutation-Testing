@@ -5,6 +5,7 @@ import operias.OperiasStatus;
 
 import org.junit.*;
 
+import mutation.testing.ExitRequiredException;
 import operias.coverage.Cobertura;
 import operias.test.general.*;
 @Ignore
@@ -19,7 +20,11 @@ public class CoberturaTest {
 	public void testCoberturaExecution(){
 		cobertura = new Cobertura("src/test/resources/simpleMavenProject");
 		cobertura.setOutputDirectory("target/simpleMavenProject");
-		assertNotNull("Executing cobertura failed", cobertura.executeCobertura());	
+		try {
+			assertNotNull("Executing cobertura failed", cobertura.executeCobertura());
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}	
 	}
 	
 	/**
@@ -28,7 +33,11 @@ public class CoberturaTest {
 	@Test
 	public void testFailedCoberturaExecution() {
 		cobertura = new Cobertura("src/test/resources/noMavenProject");
-		assertNull("Executing cobertura failed", cobertura.executeCobertura());
+		try {
+			assertNull("Executing cobertura failed", cobertura.executeCobertura());
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -47,7 +56,9 @@ public class CoberturaTest {
 	    catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Exit status invalid", OperiasStatus.COVERAGE_XML_NOT_FOUND.ordinal(), e.status);
-	    }
+	    } catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 		System.setSecurityManager(null);
 		assertTrue("No exception was thrown", exceptionThrown);
 	}
@@ -67,7 +78,9 @@ public class CoberturaTest {
 	    catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Exit status invalid", OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal(), e.status);
-	    }
+	    } catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 		
 		exceptionThrown = false;
 		
@@ -78,7 +91,9 @@ public class CoberturaTest {
 	    catch (ExitException e) {
 	    	exceptionThrown = true;
             assertEquals("Exit status invalid", OperiasStatus.ERROR_COBERTURA_TASK_OPERIAS_EXECUTION.ordinal(), e.status);
-	    }
+	    } catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 
 		assertTrue("No exception was thrown", exceptionThrown);
 		

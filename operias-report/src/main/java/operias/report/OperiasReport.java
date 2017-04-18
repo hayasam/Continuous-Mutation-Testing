@@ -77,21 +77,17 @@ public class OperiasReport {
 		this.changedClasses = new LinkedList<OperiasFile>();
 		this.changedTests = new LinkedList<DiffFile>();
 		
-		// Combine all sources from both the original and revised reports
-		if(originalReport!=null){
-			sourceLocations = new ArrayList<String>(originalReport.getSources());
-			sourceLocations.addAll(revisedReport.getSources());
-			ParseReport();
-		}else{
-			throw new ExitRequiredException("the reports were not created");
-		}
 		
+		sourceLocations = new ArrayList<String>(originalReport.getSources());
+		sourceLocations.addAll(revisedReport.getSources());
+		ParseReport();
 	}
 	
 	/**
 	 * Parse the reports
+	 * @throws ExitRequiredException 
 	 */
-	private void ParseReport() {
+	private void ParseReport() throws ExitRequiredException {
 		
 		// First we loop through the old packages and classes, and compare this to the new classes
 		for(CoberturaPackage oPackage : originalReport.getPackages()) {

@@ -40,14 +40,14 @@ public class JavaToHtml {
 		public final static int QUOTE_SINGLE = 9;
 	}
 
-	// TODO: Set a style for JavaDoc tags
+	// : Set a style for JavaDoc tags
 	//private static final Collection javaJavaDocTags;
 	private static final Collection<String> javaKeywords;
 	private static final Collection<String> javaPrimitiveLiterals;
 	private static final Collection<String> javaPrimitiveTypes;
 
 	static {
-		// TODO: Probably need to add anything new in J2SE 5.0
+		// : Probably need to add anything new in J2SE 5.0
 		//final String javaJavaDocTagsArray[] = { "see", "author", "version", "param", "return", "exception",
 		//		"deprecated", "throws", "link", "since", "serial", "serialField", "serialData", "beaninfo" };
 		final String[] javaKeywordsArray = {"abstract", "assert", "break",

@@ -3,6 +3,7 @@ package operias;
 import java.io.File;
 import java.security.InvalidParameterException;
 
+import mutation.testing.ExitRequiredException;
 import operias.git.Git;
 
 
@@ -18,6 +19,21 @@ public class Configuration {
 	 */
 	private Configuration() {
 		
+	}
+	
+	public static void reset(){
+		
+		revisedDirectory = null;
+		originalDirectory = null;
+		originalCommitID = null;
+		revisedCommitID = null;
+		originalBranchName = null;
+		revisedBranchName = null;
+		destinationDirectory = (new File("site")).getAbsolutePath();
+		originalRepositoryURL = null;
+		revisedRepositoryURL = null;
+		temporaryDirectory = (new File("temp")).getAbsolutePath();
+		outputEnabled = false;
 	}
 	
 	/**
@@ -80,8 +96,9 @@ public class Configuration {
 	/**
 	 * Parse the arguments passed by the command line
 	 * @param args
+	 * @throws ExitRequiredException 
 	 */
-	public static void parseArguments(String[] args) {
+	public static void parseArguments(String[] args) throws ExitRequiredException {
 		try {
 			int i = 0;
 			while(i < args.length) {
@@ -125,11 +142,13 @@ public class Configuration {
 					i++;
 				} else {
 					Main.printLine("[Error] Unknown option \"" + args[i] + "\"");
-					System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
+					throw new ExitRequiredException(OperiasStatus.INVALID_ARGUMENTS);
+					//System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
 				}
 			}
 		} catch (Exception e) {
-			System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
+			throw new ExitRequiredException(OperiasStatus.INVALID_ARGUMENTS);
+			//System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
 		}
 
 	}
@@ -249,9 +268,10 @@ public class Configuration {
 	}
 	/**
 	 * Set up the original and/or revised directories according to the provided arguments
+	 * @throws ExitRequiredException 
 	 * @throws Exception 
 	 */
-	public static void setUpDirectoriesThroughGit()  {
+	public static void setUpDirectoriesThroughGit() throws ExitRequiredException  {
 		try {
 			if (Configuration.getOriginalDirectory() == null) {
 				Configuration.setOriginalDirectory(setUpDirectoriesThroughGit(Configuration.getOriginalRepositoryURL(), Configuration.getOriginalBranchName(), Configuration.getOriginalCommitID()));
@@ -263,7 +283,8 @@ public class Configuration {
 		} catch(Exception e) {
 			e.printStackTrace();
 			Main.printLine("[Error] Error setting up directory through git");
-			System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
+			throw new ExitRequiredException(OperiasStatus.INVALID_ARGUMENTS);
+			//System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
 		}
 	}
 	

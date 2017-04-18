@@ -55,9 +55,13 @@ public class XMLReportTest {
 	@Test
 	public void testBasicXMLReport()  {
 		
-		originalCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject1.xml"), "").constructReport();
+		try {
+			originalCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject1.xml"), "").constructReport();
+		
 		revisedCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject2.xml"), "").constructReport();
-
+		} catch (ExitRequiredException e2) {
+			e2.printStackTrace();
+		}
 		try {
 			diffReport = new DiffReport("src/test/resources/mavenProject1", "src/test/resources/mavenProject2");
 		} catch (IOException e) {
@@ -70,7 +74,6 @@ public class XMLReportTest {
 			XMLReport xmlReport = new XMLReport(report);
 			xmlReport.generateReport();
 		} catch (ExitRequiredException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (ParserConfigurationException e) {
 			fail(e.getMessage());

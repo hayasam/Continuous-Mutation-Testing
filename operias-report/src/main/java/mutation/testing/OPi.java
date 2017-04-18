@@ -51,19 +51,15 @@ public class OPi {
 		
 		Main.printLine("[OPi+] Pipeline: Number of files mutated: "+mutatedFiles.size()); 
 		if(mutatedFiles.size()>0){			
-			//TODO 3 is an assumption for operias
-			//String path = operiasReport.getSourceLocations().get(3);
-			//int tempLocation = path.indexOf("temp");
-			//String newVersionPomPath =  (String) path.subSequence(0, tempLocation+18);
 			
 			Main.printLine("[OPi+][INFO] Start processing the commited changes");
 			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID());
 			processMutatedCommit(pitestReportsPath);
 			
 		}else{
-			//TODO message for no code to mutate
 			//this scenario is not usefull for the Evaluation step => it should just output the old Operias report
 			Main.printLine("[OPi+][BLUE-1] There are NO changed code lines that are also covered by the test suite");
+			FileWriter.blue1();
 		}
 		
 	}
@@ -74,7 +70,6 @@ public class OPi {
 		
 		for(MutatedFile currentMutatedFile : mutatedFiles){
 			System.out.println("[OPi+][INFO] Processing each file in commit "+currentMutatedFile.getCommitID());
-			//TODO extract exact location of pitest report for currentMutatedFile
 			
 			System.out.println("my path for pitest reports is "+pitestReportsPath);
 			System.out.println("the file that was changed in the same commit is: "+currentMutatedFile.getSystemFileName());
@@ -111,14 +106,14 @@ public class OPi {
 			int lastLineAdded = firstLineAdded +currentChange.getSourceDiffDelta().getRevised().getLines().size() -1;
 					
 					
-			//TODO  obs: might be difernt for update and change; maybe use size of revisedCoverage
+			//obs: might be difernt for update and change; maybe use size of revisedCoverage
 			
 			List<Boolean> codeChunkAdded = currentChange.getRevisedCoverage();
 			System.out.println("in the current change there are "+currentChange.getRevisedCoverage().size()+" lines affected");
 			for(int i = firstLineAdded; i<=lastLineAdded; i++){
 				
 				if(codeChunkAdded.get(i-firstLineAdded)!=null && codeChunkAdded.get(i-firstLineAdded))
-					diffCoveredLines.add(i+1);//TODO ?check how pitest looks at the code lines, with +1 we have the new line numbering starting from 1
+					diffCoveredLines.add(i+1);
 					System.out.println("[OPi+][INFO] A line that changed and covered is in new version at: "+(i+1));
 			}
 			System.out.println("[OPi+] We have "+ diffCoveredLines.size()+" lines to mutate");
@@ -126,7 +121,7 @@ public class OPi {
 			
 		}else if(currentChange instanceof DeleteSourceChange){
 			System.out.println("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition()+" for " +currentChange.getSourceDiffDelta().getRevised().size()+" rows");
-			//TODO this information has to be processed. it does not give correct line number for latter lines
+			//!!! this information has to be processed. it does not give correct line number for latter lines
 			
 		}else {
 			//Increased and Decreased Coverage - considered changes by Operias

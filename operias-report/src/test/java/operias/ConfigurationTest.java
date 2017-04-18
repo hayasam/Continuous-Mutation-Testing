@@ -11,6 +11,9 @@ import operias.test.general.NoExitSecurityManager;
 
 import org.junit.After;
 import org.junit.Test;
+
+import mutation.testing.ExitRequiredException;
+
 import org.junit.Before;
 import org.junit.Ignore;
 @Ignore
@@ -183,7 +186,10 @@ public class ConfigurationTest {
 		assertEquals(new File("temp").getAbsolutePath(), Configuration.getTemporaryDirectory());
 		assertEquals(false, Configuration.isOutputEnabled());
 		
-		Configuration.parseArguments(new String[] { "-d", "dest/dir"});
+		
+		try {
+			Configuration.parseArguments(new String[] { "-d", "dest/dir"});
+		
 		assertEquals("dest/dir" , Configuration.getDestinationDirectory());
 		
 		Configuration.parseArguments(new String[] { "-td", "temp/dir"});
@@ -220,7 +226,9 @@ public class ConfigurationTest {
 		
 		Configuration.parseArguments(new String[] { "-v" });
 		assertEquals(true, Configuration.isOutputEnabled());
-		
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -241,7 +249,10 @@ public class ConfigurationTest {
 		assertEquals(new File("temp").getAbsolutePath(), Configuration.getTemporaryDirectory());
 		assertEquals(false, Configuration.isOutputEnabled());
 		
-		Configuration.parseArguments(new String[] { "--destination-directory", "dest/dir"});
+		
+		try {
+			Configuration.parseArguments(new String[] { "--destination-directory", "dest/dir"});
+		
 		assertEquals("dest/dir" , Configuration.getDestinationDirectory());
 		
 		Configuration.parseArguments(new String[] { "--temp-directory", "temp/dir"});
@@ -279,6 +290,9 @@ public class ConfigurationTest {
 		Configuration.parseArguments(new String[] { "--verbose" });
 		assertEquals(true, Configuration.isOutputEnabled());
 		
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**

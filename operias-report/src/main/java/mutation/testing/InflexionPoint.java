@@ -12,6 +12,11 @@ public class InflexionPoint {
 		this.codeLineNumber = codeLineNumber;
 		this.codeLine = codeLine;
 		this.mutations = mutations;
+		
+		for(Mutation mutant : mutations){
+			FileWriter.writeInFile(mutant.getName(), mutant.getDescription(), mutant.getStatus());
+		}
+		
 	}
 	
 	

@@ -34,6 +34,10 @@ public class MutatedFile {
 		String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
 		this.mutationReportPath = mutationReportPath;
 		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
+		
+		FileWriter.setFileName(tokens[6]);
+		FileWriter.setPath(systemFileName);
+		
 		extractMutationReport();
 	}
 	
@@ -71,10 +75,20 @@ public class MutatedFile {
 			//these lines dont have any mutant to create for them. only code line available.
 			Elements noAvailableOperator = doc.getElementsByAttributeValue("class", "na");
 			
-			//TODO talk about lines that are changed but not covered => add warning	
+			
+			
+			
+			if(noAvailableOperator.size()>0){
+				//TODO if line has no mutants BUT was changed then it has BLUE-2 output!!
+				//ALSO talk to Arie: if line has mutants but no test coverage do we considet that critical area that should be tested? do we take it into consideration for the evaluation??
+				
+				Main.printLine("[OPi+][BLUE-2??]");
+				
+			}
+			
 			
 			//actual covered content = size/2;
-			parseSetToInflexionPoints(noTestCoverageContent,diffCoveredLines);
+			parseSetToInflexionPoints(coveredContent,diffCoveredLines);
 			
 		
 			Main.printLine("[OPi+][INFO] Total number of inflexion points: "+inflexionPoints.size());	
@@ -93,16 +107,25 @@ public class MutatedFile {
 				//process mutants for this line of code (changed and also covered)
 				Element mutationInfo = content.get(counter).nextElementSibling();
 				ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
+				
+				FileWriter.setLineNumber(codeLineNumber);
+				
 				if(!mutationInfo.text().isEmpty()){  //line has mutants
 					survivingMutants = processMutantsInfo(mutationInfo.text());
 					counter++;
 					String codeLine = content.get(counter).text();
+					
+					FileWriter.setNewCodeLine(codeLine);
+					FileWriter.setBlueOutput("5");
 					inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, survivingMutants));
 					Main.printLine("[OPi+][BLUE-5] created new inflexion point "+codeLineNumber);
 					
 				}else{
 					counter++;
 					//TODO expand this to blue 2 and blue 3
+					FileWriter.setNewCodeLine(content.get(counter).ownText());
+					FileWriter.setBlueOutput("2/3");
+					FileWriter.writeInFile("");
 					Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+codeLineNumber+"   "+content.get(counter).ownText());
 				}
 			}else{
@@ -115,19 +138,17 @@ public class MutatedFile {
 	
 	private ArrayList<Mutation> processMutantsInfo(String info){
 		
-		String[] tokens = info.split(" ");
+		
 		int numberOfMutantsForLine = Integer.parseInt(info.split(" ")[0]);
 		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-		
-		String[] descriptions = info.split("\\.");
+		String[] descriptions = info.split(":");
 		for(int i=1; i<descriptions.length;i++){
 			String description = descriptions[i];
 			String status;
 			if(description.contains("SURVIVED")){
 				status = "SURVIVED";
-				int startOfDescription = description.indexOf(":")+1;
 				int endOfDescription = description.indexOf(status)-3;
-				String mutantDescription = description.substring(startOfDescription, endOfDescription);
+				String mutantDescription = description.substring(0, endOfDescription);
 				String mutantName = parseDescriptionToMutantName(description);
 				mutations.add(new Mutation(mutantName, mutantDescription, status));
 			}else{
@@ -140,7 +161,6 @@ public class MutatedFile {
 	
 	
 
-	//TODO not all operators have valid condition nor unique
 	private String parseDescriptionToMutantName(String description){
 		
 		String mutantName = null;
@@ -152,9 +172,6 @@ public class MutatedFile {
 		}else if(description.contains("replaced call to ")){
 			mutantName = "ARGUMENT_PROPAGATION_MUTATOR";
 			mutationDescription = "replaces the result of the method call with a parameter";
-		}else if(description.contains("removed call")){
-			mutantName = "CONSTRUCTOR_CALL_MUTATOR";
-			mutationDescription = "removed call";
 		}else if(description.contains("Changed increment from")){
 			mutantName = "INCREMENTS_MUTATOR";
 			mutationDescription = "Changed increment";
@@ -167,18 +184,12 @@ public class MutatedFile {
 		}else if(description.contains("negated conditional")){
 			mutantName = "NEGATE_CONDITIONALS_MUTATOR";
 			mutationDescription = "negated conditional";
-		}else if(description.contains("removed conditional - replaced")){
-			mutantName = "NON_VOID_METHOD_CALL_MUTATOR";
-			mutationDescription = "";
-		}else if(description.contains("removed conditional - replaced")){
+		}else if(description.contains("removed conditional - replaced") && description.contains(" check with")){
 			mutantName = "REMOVE_CONDITIONALS_MUTATOR";
 			mutationDescription = "removed conditional - replaced";
 		}else if(description.contains("mutated return of Object value for")){
 			mutantName = "RETURN_VALS_MUTATOR";
 			mutationDescription = "mutated return of Object value for ?  to ( if (x != null) null else throw new RuntimeException )";
-		}else if(description.contains("")){
-			mutantName = "VOID_METHOD_CALL_MUTATOR";
-			mutationDescription = "";
 		}else if(description.contains("Removed increment")){
 			mutantName = "REMOVE_INCREMENTS_MUTATOR";
 			mutationDescription = "Removed increment";
@@ -191,9 +202,12 @@ public class MutatedFile {
 		}else if(description.contains("Removed assignment to member variable")){
 			mutantName = "MEMBER_VARIABLE_MUTATOR";
 			mutationDescription = "Removed assignment to member variable";
-		}else if(description.contains("")){
+		}else if(description.contains("removed negation")){
 			mutantName = "INVERT_NEGS_MUTATOR";
-			mutationDescription = "";
+			mutationDescription = "removed negation";
+		}else if(description.contains("removed call to")){
+			mutantName = "METHOD_CALL_VISITOR";
+			mutationDescription = "Removed a method call. This is one of 3 posible mutants that have the same description: NON_VOID_METHOD_CALL_MUTATOR, VOID_METHOD_CALL_MUTATOR or CONSTRUCTOR_MUTATOR";
 		}
 		return mutantName;
 	}

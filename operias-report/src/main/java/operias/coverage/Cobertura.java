@@ -3,6 +3,7 @@ package operias.coverage;
 import java.io.File;
 import java.io.IOException;
 
+import mutation.testing.ExitRequiredException;
 import operias.Main;
 import operias.OperiasStatus;
 
@@ -41,8 +42,9 @@ public class Cobertura {
 	 * Execute cobertura on the given directory,
 	 * we need to execute mvn cobertura:cobertura -Dcobertura.report.format=xml -f directory on the target directory.
 	 * @return A Cobertura report object
+	 * @throws ExitRequiredException 
 	 */
-	public CoverageReport executeCobertura() {
+	public CoverageReport executeCobertura() throws ExitRequiredException {
 		boolean succeeded;
 		try {
 			Main.printLine("[Info] [" + Thread.currentThread().getName() + "] Start execution of Cobertura");
@@ -60,10 +62,12 @@ public class Cobertura {
 			
 		} catch (IOException e) {
 			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Error during the execution sequence of Cobertura");
-			System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_TASK_CREATION);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
 		} catch (InterruptedException e) {
 			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Error during the execution sequence of Cobertura");
-			System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_TASK_CREATION);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
 		}
 		
 		return null;
@@ -74,8 +78,9 @@ public class Cobertura {
 	 * @return true if cobertura was succesfully executed, false otherwise
 	 * @throws IOException 
 	 * @throws InterruptedException 
+	 * @throws ExitRequiredException 
 	 */
-	private boolean executeCoberturaTask() throws IOException, InterruptedException {
+	private boolean executeCoberturaTask() throws IOException, InterruptedException, ExitRequiredException {
 		boolean executionSucceeded = false;
 
 		File pomXML = new File(directory, "pom.xml");
@@ -86,12 +91,14 @@ public class Cobertura {
 			secondString = (new File("")).getCanonicalPath();
 		} catch (Exception e) {
 			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Error creating cobertura task");
-			System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_TASK_CREATION);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_TASK_CREATION.ordinal());
 		}
 		
 		if (firstString.equals(secondString)) {
 			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Cannot execute cobertura on operias, infinite loop!");
-			System.exit(OperiasStatus.ERROR_COBERTURA_TASK_OPERIAS_EXECUTION.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_TASK_OPERIAS_EXECUTION);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_TASK_OPERIAS_EXECUTION.ordinal());
 		}
 		
 		
@@ -120,13 +127,15 @@ public class Cobertura {
 	/**
 	 * Construct a report from the coverage.xml file
 	 * @return
+	 * @throws ExitRequiredException 
 	 */
-	private CoverageReport constructReport() {
+	private CoverageReport constructReport() throws ExitRequiredException {
 		File coverageXML = new File(outputDirectory, "target/site/cobertura/coverage.xml");
 		
 		if (!coverageXML.exists()) {
 			Main.printLine("[Error] [" + Thread.currentThread().getName() + "] Coverage file was not found!");
-			System.exit(OperiasStatus.COVERAGE_XML_NOT_FOUND.ordinal());
+			throw new ExitRequiredException(OperiasStatus.COVERAGE_XML_NOT_FOUND);
+			//System.exit(OperiasStatus.COVERAGE_XML_NOT_FOUND.ordinal());
 		}
 		
 		return new CoverageReport(coverageXML, outputDirectory + "/target/surefire-reports/").constructReport();

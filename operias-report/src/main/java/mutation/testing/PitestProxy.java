@@ -26,7 +26,7 @@ public class PitestProxy {
 		GitProxy.changeHeadTo(commitID);
 		String mutationPath = null;
 		
-		//TODO change local path due to Pitest Bug: hcoles/pitest: Issue #336
+		//change running local path due to Pitest Bug: hcoles/pitest: Issue #336
         Invoker invoker = new DefaultInvoker();	 
         invoker.setMavenHome(new File(settings.MAVEN_PATH));
         Main.printLine("[OPi+][INFO] set maven home to: "+settings.MAVEN_PATH);
@@ -34,8 +34,10 @@ public class PitestProxy {
 		//setup Pitest on last commit
 		InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile( new File( settings.pomPath.getAbsolutePath()+"/pom.xml" ) );
-        request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit" ) );
-         
+        request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests="+GitProxy.groupArtifactID+" -Dmutators=ALL" ) );
+        //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
+        
+       
         //run Pitest on last commit
         InvocationResult result;
 		try {

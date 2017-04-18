@@ -254,7 +254,7 @@ public class HTMLClassView extends HTMLCodeView {
 	    }
 		
 		outputStreamHTMLFile.println("</table>");
-		// TODO, check for any chances after we are done, there can be inserts afterwards
+		// , check for any chances after we are done, there can be inserts afterwards
 		
 		sourceFileReader.close();
 	}

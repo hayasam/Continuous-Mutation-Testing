@@ -24,8 +24,13 @@ public class OperiasReportTest {
 	 */
 	@Test
 	public void testSimpleOperiasReport() {
-		CoverageReport originalCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject1.xml"), "src/test/resources/sureFireReports/").constructReport();
+		CoverageReport originalCoverage;
+		try {
+			originalCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject1.xml"), "src/test/resources/sureFireReports/").constructReport();
+		
 		CoverageReport revisedCoverage = new CoverageReport(new File("src/test/resources/coverageMavenProject2.xml"), "src/test/resources/sureFireReports/").constructReport();
+		
+		
 		DiffReport diffReport = null;
 		try {
 			diffReport = new DiffReport("src/test/resources/mavenProject1", "src/test/resources/mavenProject2");
@@ -37,7 +42,6 @@ public class OperiasReportTest {
 		try {
 			report = new OperiasReport(originalCoverage, revisedCoverage, diffReport);
 		} catch (ExitRequiredException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -152,11 +156,16 @@ public class OperiasReportTest {
 		assertNull(sixthClass.getChanges().get(0).getRevisedCoverage().get(10));
 		assertNull(sixthClass.getChanges().get(0).getRevisedCoverage().get(11));
 		
+		
 		try {
 		new HTMLReport(report).generateReport();
 		} catch (Exception e) {
 			
 		
+		}
+		
+		} catch (ExitRequiredException e2) {
+			e2.printStackTrace();
 		}
 	}
 }

@@ -47,7 +47,7 @@ public class Main {
 			e.printStackTrace();
 		}
 		
-		GitProxy.deleteTempFolder();
+		
 		Main.printLine("[OPi+][Info] Execution of mutated operias was a great success!");
 		
 	}
@@ -63,7 +63,8 @@ public class Main {
 	}
 
 	public static void main(String[] arguments) {
-		// TODO Auto-generated method stub
 		
 	}
+
+	
 }

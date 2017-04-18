@@ -36,6 +36,7 @@ public class GitProxy {
 	public static Git git;
 	public static ThirdPartyProxySeetings settings;
 	public static String pathToTmpFolder;
+	public static String groupArtifactID;
 	
 	
 	
@@ -98,7 +99,7 @@ public class GitProxy {
 	}
 	
 	private static boolean buildRepoProject() {
-		   //TODO
+		   
         /*
          It is expected behaviour for no mutants to be found if you clone a project and directly run a mutation coverage goal. 
 			The project has to be built first. Normally you would bind the goal to a phase within the pom so that this happens 
@@ -113,7 +114,8 @@ public class GitProxy {
 				return true;
 			}else{
 				Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
-				//TODO should the entire process stop??? we cant run pitest on this version anyway
+				//we cant run pitest on this version since it does not build. we only build the system one time at the beginning
+				System.exit(1);
 			}
 		} catch (IOException|InterruptedException e) {
 			Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
@@ -124,9 +126,7 @@ public class GitProxy {
 	}
 
 	private static void setCommitsToProcess() {
-		//TODO filter the commits
-        Iterable<RevCommit> history;
-        //TODO make classes not static with proper constructor
+		Iterable<RevCommit> history;
         commitsID = new ArrayList<String>();
         previousCommit = new HashMap<String,String>();
 		try {
@@ -135,9 +135,12 @@ public class GitProxy {
 			
 			 for (RevCommit commit : history) {
 				 if(commit.getParentCount()>0){
-					 if(commit.getName().equals("0d237147620f1484831ab12cc87a7f242cd22b85")|| commit.getName().equals("ee61cea19f2c1b7b2d9ff4fac9c36ebbc7a7061c")){ //
-							
-					 //if(commitPassOPiPreFilter(commit)){
+					 if(commitPassOPiPreFilter(commit)){ 
+				
+				//(commit.getName().equals("d4b203882f3d59020982d09c810f19a8ea6a0eab") || commit.getName().equals(""))){ 
+				//ee61cea19f2c1b7b2d9ff4fac9c36ebbc7a7061c
+				//0d237147620f1484831ab12cc87a7f242cd22b85
+						 
 						 commitsID.add(commit.getName());
 						 previousCommit.put(commit.getName(),commit.getParent(0).getName());
 					 } 
@@ -162,10 +165,19 @@ public class GitProxy {
 	 * */
 	private static boolean commitPassOPiPreFilter(RevCommit commit) {
 		
+		
+		boolean sw = true;
 		List<String> filesChangedInCurrentCommit = getFilesInCommit(git.getRepository(),commit,true);
 		for(String currentFilePath : filesChangedInCurrentCommit)
-			if(currentFilePath.contains("src/main/java"))
-				return true;
+			if(currentFilePath.contains("src/main/java")){
+				if(sw){
+					String[] tokens = currentFilePath.split("/");
+					groupArtifactID = tokens[3]+"."+tokens[4]+".*";
+					sw=false;
+				}
+			return true;	
+			}
+				
 		return false;
 	}
 

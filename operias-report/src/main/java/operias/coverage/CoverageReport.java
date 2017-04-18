@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import mutation.testing.ExitRequiredException;
 import operias.OperiasStatus;
 
 public class CoverageReport {
@@ -54,10 +55,12 @@ public class CoverageReport {
 	/**
 	 * Create a coverage report based on only a xml file
 	 * @param coverageXML
+	 * @throws ExitRequiredException 
 	 */
-	public CoverageReport(File coverageXML, String surefireDirectory) {
+	public CoverageReport(File coverageXML, String surefireDirectory) throws ExitRequiredException {
 		if (coverageXML == null || !coverageXML.exists() || !coverageXML.isFile() || !coverageXML.canRead()) {
-			System.exit(OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_INVALID_XML);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal());
 		}
 		this.coverageXML = coverageXML;
 		this.surefireDirectory = surefireDirectory;
@@ -69,8 +72,9 @@ public class CoverageReport {
 	
 	/**
 	 * Construct the report
+	 * @throws ExitRequiredException 
 	 */
-	public CoverageReport constructReport() {
+	public CoverageReport constructReport() throws ExitRequiredException {
 
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		/*dbFactory.setNamespaceAware(false);
@@ -124,7 +128,8 @@ public class CoverageReport {
 			}
 			
 		} catch (Exception e) {
-			System.exit(OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_COBERTURA_INVALID_XML);
+			//System.exit(OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal());
 		}
 		
 		if (!surefireDirectory.equals("")) {
@@ -172,7 +177,8 @@ public class CoverageReport {
 						}
 						
 					} catch (Exception e) {
-						System.exit(OperiasStatus.ERROR_SUREFIRE_INVALID_XML.ordinal());
+						throw new ExitRequiredException(OperiasStatus.ERROR_SUREFIRE_INVALID_XML);
+						//System.exit(OperiasStatus.ERROR_SUREFIRE_INVALID_XML.ordinal());
 					}
 				}
 			}

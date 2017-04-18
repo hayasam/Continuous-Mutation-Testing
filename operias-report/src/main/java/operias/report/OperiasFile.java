@@ -6,6 +6,7 @@ import difflib.ChangeDelta;
 import difflib.DeleteDelta;
 import difflib.Delta;
 import difflib.InsertDelta;
+import mutation.testing.ExitRequiredException;
 import operias.Main;
 import operias.OperiasStatus;
 import operias.coverage.CoberturaClass;
@@ -120,8 +121,9 @@ public class OperiasFile {
 	 * @param originalClass
 	 * @param revisedClass
 	 * @param sourceDiff
+	 * @throws ExitRequiredException 
 	 */
-	public OperiasFile(CoberturaClass originalClass, CoberturaClass revisedClass, DiffFile sourceDiff) {
+	public OperiasFile(CoberturaClass originalClass, CoberturaClass revisedClass, DiffFile sourceDiff) throws ExitRequiredException {
 		this.className = originalClass.getName();
 		this.packageName = originalClass.getPackageName();
 		this.changes = new LinkedList<OperiasChange>();
@@ -131,7 +133,8 @@ public class OperiasFile {
 		
 		if (!originalClass.getName().equals(revisedClass.getName())) {
 			// Invalid class comparison, may not happen!
-			System.exit(OperiasStatus.ERROR_OPERIAS_DIFF_INVALID_CLASS_COMPARISON.ordinal());
+			throw new ExitRequiredException(OperiasStatus.ERROR_OPERIAS_DIFF_INVALID_CLASS_COMPARISON);
+			//System.exit(OperiasStatus.ERROR_OPERIAS_DIFF_INVALID_CLASS_COMPARISON.ordinal());
 		}
 		
 		CompareLines(1, 1);
@@ -141,8 +144,9 @@ public class OperiasFile {
 	 * Compare lines with each other
 	 * @param originalClassLine Line in the original class coverage information
 	 * @param revisedClassLine Line in the new class coverage information
+	 * @throws ExitRequiredException 
 	 */
-	public void CompareLines(int originalClassLine, int revisedClassLine) {
+	public void CompareLines(int originalClassLine, int revisedClassLine) throws ExitRequiredException {
 		if (originalClassLine > originalClass.getMaxLineNumber() && 
 				revisedClassLine > revisedClass.getMaxLineNumber()) {
 			return;
@@ -169,6 +173,7 @@ public class OperiasFile {
 				// Lines found, compare!
 				if (originalLine.isCondition() ^ revisedLine.isCondition()) {
 					// Again something went wrong i suppose... no change in the line, so is either should both be conditions or not
+					throw new ExitRequiredException(OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON);
 					//System.exit(OperiasStatus.ERROR_OPERIAS_INVALID_LINE_COMPARISON.ordinal());				
 				}
 				

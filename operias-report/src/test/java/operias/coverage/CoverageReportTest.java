@@ -19,6 +19,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import mutation.testing.ExitRequiredException;
+
 public class CoverageReportTest {
 
 	/**
@@ -49,6 +51,8 @@ public class CoverageReportTest {
 		} catch(ExitException e) {
 			exceptionThrown = true;
 			assertEquals("Wrong exit code", OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal(), e.status);
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
 		}
 		assertTrue("No exception was thrown", exceptionThrown);
 		
@@ -59,6 +63,8 @@ public class CoverageReportTest {
 		} catch(ExitException e) {
 			exceptionThrown = true;
 			assertEquals("Wrong exit code", OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal(), e.status);
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
 		}
 		assertTrue("No exception was thrown", exceptionThrown);
 		
@@ -69,6 +75,8 @@ public class CoverageReportTest {
 		} catch(ExitException e) {
 			exceptionThrown = true;
 			assertEquals("Wrong exit code", OperiasStatus.ERROR_COBERTURA_INVALID_XML.ordinal(), e.status);
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
 		}
 		assertTrue("No exception was thrown", exceptionThrown);
 	}
@@ -81,7 +89,10 @@ public class CoverageReportTest {
 		double delta = 0.0001;
 		File file = new File("src/test/resources/coverage.xml");
 
-		CoverageReport report = new CoverageReport(file, "src/test/resources/sureFireReports/").constructReport();
+		CoverageReport report;
+		try {
+			report = new CoverageReport(file, "src/test/resources/sureFireReports/").constructReport();
+		
 		
 		assertEquals("Line rate not equal", 0.7578125, report.getLineRate(),  delta);
 		assertEquals(0.75,report.getConditionRate(), delta);
@@ -128,6 +139,10 @@ public class CoverageReportTest {
 				assertEquals("example.LoopsTest", tReport.getClassName());
 				assertEquals("testLoop", tReport.getCaseName());
 			} 
+		}
+		
+		} catch (ExitRequiredException e) {
+			e.printStackTrace();
 		}
 	}
 }
