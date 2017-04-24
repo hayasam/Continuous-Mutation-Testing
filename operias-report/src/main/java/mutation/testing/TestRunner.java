@@ -17,7 +17,7 @@ public class TestRunner {
 				GitProxy.settings = settings;
 				PitestProxy.settings = settings;
 				
-				
+				GitProxy.getChangesFromACommit();
 				
 				//get commits to analyze
 				ArrayList<String>  commits = GitProxy.getFilteredCommits();

@@ -14,7 +14,7 @@ public class InflexionPoint {
 		this.mutations = mutations;
 		
 		for(Mutation mutant : mutations){
-			FileWriter.writeInFile(mutant.getName(), mutant.getDescription(), mutant.getStatus());
+			EvaluationFileWriter.writeInFile(mutant.getName(), mutant.getDescription(), mutant.getStatus());
 		}
 		
 	}

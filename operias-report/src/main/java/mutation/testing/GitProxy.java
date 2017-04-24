@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.DepthWalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import operias.Main;
@@ -126,6 +127,8 @@ public class GitProxy {
 	}
 
 	private static void setCommitsToProcess() {
+		int count=0;
+		int limit = 3;
 		Iterable<RevCommit> history;
         commitsID = new ArrayList<String>();
         previousCommit = new HashMap<String,String>();
@@ -135,12 +138,12 @@ public class GitProxy {
 			
 			 for (RevCommit commit : history) {
 				 if(commit.getParentCount()>0){
-					 if(commitPassOPiPreFilter(commit)){ 
+					 if(commitPassOPiPreFilter(commit) && count<limit){ 
 				
 				//(commit.getName().equals("d4b203882f3d59020982d09c810f19a8ea6a0eab") || commit.getName().equals(""))){ 
 				//ee61cea19f2c1b7b2d9ff4fac9c36ebbc7a7061c
 				//0d237147620f1484831ab12cc87a7f242cd22b85
-						 
+						 count++;
 						 commitsID.add(commit.getName());
 						 previousCommit.put(commit.getName(),commit.getParent(0).getName());
 					 } 
@@ -219,6 +222,9 @@ public class GitProxy {
 						Main.printLine("[OPi+][ERROR] failed to retrieve blob size for " + tw.getPathString());
 					}			
 					list.add(tw.getPathString());
+					System.out.println("----------------------------");
+					System.out.println(tw.getOperationType()+"     "+tw.getPathString());
+					
 				}
 				tw.close();
 			} else {
@@ -272,6 +278,35 @@ public class GitProxy {
 			e.printStackTrace();
 		}
 		
+		
+	}
+
+	public static void getChangesFromACommit() {
+		
+		try {
+			runRepoProcessing();
+			Iterable<RevCommit> history = git.log().call();
+			
+			 for (RevCommit commit : history) {
+				 if(commit.getParentCount()>0){
+					 
+					 System.out.println(commit.getName());
+					 //System.out.println(git.diff().setOutputStream( System.out ).call());
+
+					 
+					 
+					 
+				}else{
+					Main.printLine("[OPi+][INFO] Git Repo Processing: this is the first commit in history. Therefore the entire text is a new change. This particular commit we ignore");
+				 }
+				 
+		        
+		    }
+			 
+		} catch (GitAPIException e) {
+			Main.printLine("[OPi+][Error] Git Repo Processing: could not retrieve repository history");
+			e.printStackTrace();
+		}
 		
 	}
 

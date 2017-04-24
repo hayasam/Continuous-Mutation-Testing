@@ -31,12 +31,15 @@ public class MutatedFile {
 	
 	public void setMutationReportPath(String path){
 		String[] tokens = systemFileName.split("/");
-		String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
+		
+		//TODO jsoup hack
+		//String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
+		String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
 		this.mutationReportPath = mutationReportPath;
 		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
 		
-		FileWriter.setFileName(tokens[6]);
-		FileWriter.setPath(systemFileName);
+		EvaluationFileWriter.setFileName(tokens[6]);
+		EvaluationFileWriter.setPath(systemFileName);
 		
 		extractMutationReport();
 	}
@@ -108,24 +111,24 @@ public class MutatedFile {
 				Element mutationInfo = content.get(counter).nextElementSibling();
 				ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
 				
-				FileWriter.setLineNumber(codeLineNumber);
+				EvaluationFileWriter.setLineNumber(codeLineNumber);
 				
 				if(!mutationInfo.text().isEmpty()){  //line has mutants
 					survivingMutants = processMutantsInfo(mutationInfo.text());
 					counter++;
 					String codeLine = content.get(counter).text();
 					
-					FileWriter.setNewCodeLine(codeLine);
-					FileWriter.setBlueOutput("5");
+					EvaluationFileWriter.setNewCodeLine(codeLine);
+					EvaluationFileWriter.setBlueOutput("5");
 					inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, survivingMutants));
 					Main.printLine("[OPi+][BLUE-5] created new inflexion point "+codeLineNumber);
 					
 				}else{
 					counter++;
 					//TODO expand this to blue 2 and blue 3
-					FileWriter.setNewCodeLine(content.get(counter).ownText());
-					FileWriter.setBlueOutput("2/3");
-					FileWriter.writeInFile("");
+					EvaluationFileWriter.setNewCodeLine(content.get(counter).ownText());
+					EvaluationFileWriter.setBlueOutput("2/3");
+					EvaluationFileWriter.writeInFile("");
 					Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+codeLineNumber+"   "+content.get(counter).ownText());
 				}
 			}else{

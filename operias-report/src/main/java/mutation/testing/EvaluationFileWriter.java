@@ -3,11 +3,11 @@ package mutation.testing;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Writer;
 
-public class FileWriter {
+public class EvaluationFileWriter {
 
 	private static String SEPARATOR = "|@| ";
 	
@@ -20,11 +20,12 @@ public class FileWriter {
 	private static String blueOutput;
 	
 	private static BufferedWriter bw;
+	private static String evaluationFileName;
+	private static FileOutputStream fos;
 	
-	
-	public FileWriter(String fileName, String path) throws IOException{
+	public EvaluationFileWriter(String fileName, String path) throws IOException{
 		
-		
+			  evaluationFileName = path+"/"+fileName+".csv";
 		      File file = new File(path+"/"+fileName+".csv");
 		      System.out.println(path+"/"+fileName+".csv");
 		      
@@ -36,20 +37,21 @@ public class FileWriter {
 		      
 		      
 		      
-		  	FileOutputStream fos = new FileOutputStream(file);
+		  	fos = new FileOutputStream(file);
 		  	bw = new BufferedWriter(new OutputStreamWriter(fos));
 		    write("CommitID"+SEPARATOR+"Path in project"+SEPARATOR
 		    		+"File Name"+SEPARATOR+"LineNumber"+SEPARATOR
 		    		+"Old Line"+SEPARATOR+"New Line"+SEPARATOR
 		    		+"BLUE output"+SEPARATOR+"Mutant Name"
 		    		+SEPARATOR+"Mutation description"+SEPARATOR+"Mutant STATUS");
+		   
 	}
 	
 	public static void write(String text){
 		try {
-			connect();
 			bw.write(text);
 			bw.newLine();
+		    
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -116,7 +118,7 @@ public class FileWriter {
 
 
 	public static void setCommitID(String commitID) {
-		FileWriter.commitID = commitID;
+		EvaluationFileWriter.commitID = commitID;
 	}
 
 
@@ -134,7 +136,7 @@ public class FileWriter {
 
 
 	public static void setFileName(String fileName) {
-		FileWriter.fileName = fileName;
+		EvaluationFileWriter.fileName = fileName;
 	}
 
 
@@ -152,7 +154,7 @@ public class FileWriter {
 
 
 	public static void setLineNumber(int lineNumber) {
-		FileWriter.lineNumber = lineNumber;
+		EvaluationFileWriter.lineNumber = lineNumber;
 	}
 
 
@@ -170,7 +172,7 @@ public class FileWriter {
 
 
 	public static void setOldCodeLine(String oldCodeLine) {
-		FileWriter.oldCodeLine = oldCodeLine;
+		EvaluationFileWriter.oldCodeLine = oldCodeLine;
 	}
 
 
@@ -188,7 +190,7 @@ public class FileWriter {
 
 
 	public static void setNewCodeLine(String newCodeLine) {
-		FileWriter.newCodeLine = newCodeLine;
+		EvaluationFileWriter.newCodeLine = newCodeLine;
 	}
 
 
@@ -206,7 +208,7 @@ public class FileWriter {
 
 
 	public static void setBlueOutput(String blueOutput) {
-		FileWriter.blueOutput = blueOutput;
+		EvaluationFileWriter.blueOutput = blueOutput;
 	}
 
 	public static void setPath(String systemFileName) {

@@ -17,8 +17,11 @@ public class EvaluationRunner {
 		//RUN EVALUATION
 		
 		//set up the project
-		String REMOTE_URL = "https://github.com/junit-team/junit5.git";
-				//"https://github.com/ileontiuc/testSettings.git";
+		String REMOTE_URL = "https://github.com/jhy/jsoup";
+				//"https://github.com/ileontiuc/commons-text";
+				//"https://github.com/ileontiuc/testSettings"; 
+				
+				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
 		
 		ThirdPartyProxySeetings settings = new ThirdPartyProxySeetings(REMOTE_URL, MAVEN_PATH);
@@ -26,9 +29,9 @@ public class EvaluationRunner {
 		PitestProxy.settings = settings;
 		
 		String[] tokens = REMOTE_URL.split("/");
-		String projectName = tokens[tokens.length-1].substring(0, tokens[tokens.length-1].length()-4 );
+		String projectName = tokens[tokens.length-1].substring(0, tokens[tokens.length-1].length() );
 		try {
-			FileWriter projectFile = new FileWriter(projectName, "/home/ioana/a_Thesis_Evaluation");
+			EvaluationFileWriter projectFile = new EvaluationFileWriter(projectName, "/home/ioana/a_Thesis_Evaluation");
 			
 		//get commits to analyze
 		ArrayList<String>  commits = GitProxy.getFilteredCommits();
@@ -46,8 +49,8 @@ public class EvaluationRunner {
 			}
 		}
 		
-		GitProxy.deleteTempFolder();
-		FileWriter.close();
+		//GitProxy.deleteTempFolder();
+		EvaluationFileWriter.close();
 		Main.printLine("[OPi+][Info] done parsing all usefull commits from project "+ REMOTE_URL);
 		
 		} catch (IOException e) {

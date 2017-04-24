@@ -59,7 +59,7 @@ public class OPi {
 		}else{
 			//this scenario is not usefull for the Evaluation step => it should just output the old Operias report
 			Main.printLine("[OPi+][BLUE-1] There are NO changed code lines that are also covered by the test suite");
-			FileWriter.blue1();
+			EvaluationFileWriter.blue1();
 		}
 		
 	}
@@ -106,15 +106,17 @@ public class OPi {
 			int lastLineAdded = firstLineAdded +currentChange.getSourceDiffDelta().getRevised().getLines().size() -1;
 					
 					
-			//obs: might be difernt for update and change; maybe use size of revisedCoverage
+			//obs: might be different for update and change; maybe use size of revisedCoverage
 			
 			List<Boolean> codeChunkAdded = currentChange.getRevisedCoverage();
 			System.out.println("in the current change there are "+currentChange.getRevisedCoverage().size()+" lines affected");
 			for(int i = firstLineAdded; i<=lastLineAdded; i++){
 				
-				if(codeChunkAdded.get(i-firstLineAdded)!=null && codeChunkAdded.get(i-firstLineAdded))
+				if(codeChunkAdded.get(i-firstLineAdded)!=null && codeChunkAdded.get(i-firstLineAdded)){
 					diffCoveredLines.add(i+1);
 					System.out.println("[OPi+][INFO] A line that changed and covered is in new version at: "+(i+1));
+					System.out.println(diffCoveredLines.toString());
+				}
 			}
 			System.out.println("[OPi+] We have "+ diffCoveredLines.size()+" lines to mutate");
 			System.out.println("[OPi+] The lines that are covered AND changed are: "+ diffCoveredLines.toString());

@@ -35,8 +35,10 @@ public class Main {
 			Configuration.setUpDirectoriesThroughGit();
 		}
 		
-		new Operias().constructReport().writeHTMLReport().writeXMLReport();
-				
+		Operias myOperias = new Operias().constructReport();
+		if(Operias.clock){
+			//myOperias.writeHTMLReport().writeXMLReport();
+		}
 		
 		Main.printLine("[Info] Cleaning up!");
 		// Remove temporary directory
