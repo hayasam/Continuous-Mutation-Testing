@@ -7,7 +7,8 @@ import javax.xml.transform.TransformerException;
 
 import mutation.testing.ExitRequiredException;
 import mutation.testing.OPi;
-import operias.coverage.*;
+import operias.coverage.Cobertura;
+import operias.coverage.CoverageReport;
 import operias.diff.DiffReport;
 import operias.output.html.HTMLReport;
 import operias.output.xml.XMLReport;
@@ -100,7 +101,7 @@ public class Operias {
 						
 		} catch (InterruptedException e1) {
 			//System.exit(OperiasStatus.ERROR_THREAD_JOINING.ordinal());
-			System.out.println("got error when joining");
+			System.out.println("[Operias] error when joining threads");
 			throw new ExitRequiredException(OperiasStatus.ERROR_THREAD_JOINING);
 		}
 		

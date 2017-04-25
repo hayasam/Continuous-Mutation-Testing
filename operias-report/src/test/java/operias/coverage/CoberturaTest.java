@@ -1,13 +1,17 @@
 package operias.coverage;
 
-import static org.junit.Assert.*;
-import operias.OperiasStatus;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.*;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import mutation.testing.ExitRequiredException;
-import operias.coverage.Cobertura;
-import operias.test.general.*;
+import operias.OperiasStatus;
+import operias.test.general.ExitException;
+import operias.test.general.NoExitSecurityManager;
 @Ignore
 public class CoberturaTest {
 

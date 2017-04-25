@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-
-import operias.diff.DiffFile;
-import operias.diff.SourceDiffState;
 import difflib.ChangeDelta;
 import difflib.DeleteDelta;
 import difflib.Delta;
 import difflib.InsertDelta;
+import operias.diff.DiffFile;
+import operias.diff.SourceDiffState;
 
 public abstract class HTMLCodeView {
 

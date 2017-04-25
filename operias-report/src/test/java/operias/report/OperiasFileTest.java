@@ -1,22 +1,13 @@
 package operias.report;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import operias.OperiasStatus;
-import operias.coverage.*;
-import operias.diff.DiffFile;
-import operias.report.change.ChangeSourceChange;
-import operias.report.change.CoverageDecreaseChange;
-import operias.report.change.CoverageIncreaseChange;
-import operias.report.change.DeleteSourceChange;
-import operias.report.change.InsertSourceChange;
-import operias.report.change.OperiasChange;
-import operias.test.general.ExitException;
-import operias.test.general.NoExitSecurityManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +18,18 @@ import difflib.DeleteDelta;
 import difflib.Delta;
 import difflib.InsertDelta;
 import mutation.testing.ExitRequiredException;
+import operias.OperiasStatus;
+import operias.coverage.CoberturaClass;
+import operias.coverage.CoberturaLine;
+import operias.diff.DiffFile;
+import operias.report.change.ChangeSourceChange;
+import operias.report.change.CoverageDecreaseChange;
+import operias.report.change.CoverageIncreaseChange;
+import operias.report.change.DeleteSourceChange;
+import operias.report.change.InsertSourceChange;
+import operias.report.change.OperiasChange;
+import operias.test.general.ExitException;
+import operias.test.general.NoExitSecurityManager;
 
 public class OperiasFileTest {
 

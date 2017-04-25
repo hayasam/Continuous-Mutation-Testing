@@ -1,14 +1,15 @@
 package operias.output.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import operias.diff.SourceDiffState;
-
 import org.junit.Test;
+
+import operias.diff.SourceDiffState;
 
 public class HTMLOverviewTest {
 

@@ -5,9 +5,7 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import mutation.testing.ExitRequiredException;
-import mutation.testing.GitProxy;
-import operias.test.general.ExitException;
+import mutation.testing.*;
 
 /**
  * Main class of operias

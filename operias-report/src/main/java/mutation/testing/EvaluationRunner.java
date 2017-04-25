@@ -2,8 +2,6 @@ package mutation.testing;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import operias.Configuration;
 import operias.Main;
@@ -23,34 +21,60 @@ public class EvaluationRunner {
 				
 				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
+		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 2;
+		String localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
+		
 		
 		ThirdPartyProxySeetings settings = new ThirdPartyProxySeetings(REMOTE_URL, MAVEN_PATH);
-		GitProxy.settings = settings;
+		GitProxy localGitProxy = new GitProxy(COMMIT_MUTATION_CHANGE_LOWER_LIMIT, settings);
 		PitestProxy.settings = settings;
 		
 		String[] tokens = REMOTE_URL.split("/");
 		String projectName = tokens[tokens.length-1].substring(0, tokens[tokens.length-1].length() );
 		try {
-			EvaluationFileWriter projectFile = new EvaluationFileWriter(projectName, "/home/ioana/a_Thesis_Evaluation");
+			EvaluationFileWriter projectFile = new EvaluationFileWriter(projectName, localPathForOPiReport);
+			EvaluationDataFile dataFile = new EvaluationDataFile(projectName, localPathForOPiReport);
+			EvaluationCrashStatus crashFile = new EvaluationCrashStatus(projectName, localPathForOPiReport);
+			EvaluationDataFile.write("Project repository link: "+REMOTE_URL);
 			
 		//get commits to analyze
 		ArrayList<String>  commits = GitProxy.getFilteredCommits();
 		
+		/*
+		 * 
+		 //one time only compute the group and artifact part of the path - to use later for identifying the pitest path
+				 if(sw){
+						String[] tokens = .split("/");
+						GitProxy.groupArtifactID = tokens[3]+"."+tokens[4]+".*";
+						sw=false;
+					}
+		 * */
+		
 		//for each commit start the process
+		
 		
 		for(String commitID: commits){
 			try {
 				Configuration.reset();
 				projectFile.setCommitID(commitID);
-				runOperiasMutated(REMOTE_URL, GitProxy.previousCommit.get(commitID), commitID);
+				runOperiasMutated(REMOTE_URL, GitProxy.getPreviousCommitOf(commitID), commitID);
 			} catch (ExitRequiredException e) {
-				System.out.println("------------------------------------------------Operias crashed for commit: "+commitID);
+				System.out.println("[OPi+][ERROR]------------------------------------------------Operias crashed for commit: "+commitID);
+				EvaluationCrashStatus.recordOperiasCrash(commitID, e.getCause().toString());
 				e.printStackTrace();
+				
 			}
 		}
 		
+		
+		
+		
+		//DELETE files & CLOSE reports
+		
 		//GitProxy.deleteTempFolder();
 		EvaluationFileWriter.close();
+		EvaluationDataFile.close();
+		EvaluationCrashStatus.close();
 		Main.printLine("[OPi+][Info] done parsing all usefull commits from project "+ REMOTE_URL);
 		
 		} catch (IOException e) {

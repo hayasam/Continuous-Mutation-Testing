@@ -1,6 +1,7 @@
 package operias.output.xml;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,17 +13,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
-import operias.Configuration;
-import operias.coverage.CoverageReport;
-import operias.diff.DiffReport;
-import operias.report.OperiasReport;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
 import mutation.testing.ExitRequiredException;
+import operias.Configuration;
+import operias.coverage.CoverageReport;
+import operias.diff.DiffReport;
+import operias.report.OperiasReport;
 
 public class XMLReportTest {
 

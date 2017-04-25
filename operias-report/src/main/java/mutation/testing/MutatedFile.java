@@ -10,7 +10,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import operias.Main;
-import operias.report.OperiasFile;
 
 public class MutatedFile {
 

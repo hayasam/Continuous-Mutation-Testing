@@ -1,21 +1,22 @@
 package operias;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
-import operias.test.general.NoExitSecurityManager;
-
 import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import mutation.testing.ExitRequiredException;
-
-import org.junit.Before;
-import org.junit.Ignore;
+import operias.test.general.NoExitSecurityManager;
 @Ignore
 public class ConfigurationTest {
 

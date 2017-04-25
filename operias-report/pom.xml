@@ -88,7 +88,8 @@
 	    <artifactId>slf4j-simple</artifactId>
 	    <version>1.6.2</version>
 	</dependency>
-    
+	
+	
     <dependency>
 	  <groupId>org.apache.maven.shared</groupId>
 	  <artifactId>maven-invoker</artifactId>

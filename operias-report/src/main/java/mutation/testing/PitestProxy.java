@@ -1,10 +1,7 @@
 package mutation.testing;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
@@ -34,7 +31,7 @@ public class PitestProxy {
 		//setup Pitest on last commit
 		InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile( new File( settings.pomPath.getAbsolutePath()+"/pom.xml" ) );
-        request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests="+GitProxy.groupArtifactID+" -Dmutators=ALL" ) );
+        request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests="+GitProxy.getGroupArtifactPath()+" -Dmutators=ALL" ) );
         //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
         
        

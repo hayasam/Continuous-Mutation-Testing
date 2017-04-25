@@ -13,8 +13,9 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
@@ -24,60 +25,112 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.DepthWalk.RevWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
+
 
 import operias.Main;
 
 public class GitProxy {
 
 	
-	public static ArrayList<String> commitsID;
-	public static Map<String,String> previousCommit;
-	public static Git git;
-	public static ThirdPartyProxySeetings settings;
-	public static String pathToTmpFolder;
-	public static String groupArtifactID;
+	private static ArrayList<String> commitsID;
+	private static Map<String,String> previousCommit;
+	private static Git git;
+	private static ThirdPartyProxySeetings settings;
+	private static String pathToTmpFolder;
+	private static String groupArtifactID;
+	private static CommitFileLibrary commitFileLibrary;
 	
 	
-	
-	public static ArrayList<String> getFilteredCommits(){
-		runRepoProcessing();
-		return commitsID;
+	public GitProxy(int delta,ThirdPartyProxySeetings settings){
+		this.settings=settings;
+		setFolder();
+		cloneGitRepo();
+		setUpCommitLibrary(delta);
+		if(buildRepoProject()){
+			setHead();
+		}
 	}
 	
-	private static void runRepoProcessing(){
+	
+	public static String getGroupArtifactPath(){
+		return groupArtifactID;
+	}
+	
+	public static String getPreviousCommitOf(String commitID){
+		return previousCommit.get(commitID);
+	}
+	
+	public static ArrayList<String> getFilteredCommits(){
+		return commitFileLibrary.getPrefilteredCommitList();
+	}
+	
+	
+	public static boolean setFolder(){
 		// prepare a new folder for the cloned repository
-		try {	
+		try {
 			settings.pomPath = File.createTempFile("TestGitRepository", "");
 			 if(!settings.pomPath.delete()) {
 			        throw new IOException("Could not delete temporary file " + settings.pomPath);
 			    }
 			 Main.printLine("[OPi+][INFO] Git Repo Processing: created temporary folder at "+ settings.pomPath.getAbsolutePath());
-			pathToTmpFolder =  settings.pomPath.getAbsolutePath();
-			
-		    // GIT clone
-			Main.printLine("[OPi+][INFO] Git Repo Processing: cloning from " + settings.REMOTE_URL);
-		   
-			try {
-				git = Git.cloneRepository()
-				        .setURI(settings.REMOTE_URL)
-				        .setDirectory(settings.pomPath)
-				        .call();
-				
-				Main.printLine("[OPi+][INFO] Git Repo Processing: successfully cloned from " + settings.REMOTE_URL + " to " + settings.pomPath);
-				
-				if(buildRepoProject()){
-					setCommitsToProcess();
-					setHead();
-				}
-				
-			} catch (GitAPIException e) {
-				Main.printLine("[OPi+][ERROR] Git Repo Processing: could not clone");
-				e.printStackTrace();
-			}
+			 
 		} catch (IOException e) {
 			Main.printLine("[OPi+][Error] Git Repo Processing: could not create temporary folder");
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	
+	private static boolean cloneGitRepo(){
+		try {
+			 // GIT clone
+			Main.printLine("[OPi+][INFO] Git Repo Processing: cloning from " + settings.REMOTE_URL);
+			git = Git.cloneRepository()
+			        .setURI(settings.REMOTE_URL)
+			        .setDirectory(settings.pomPath)
+			        .call();
+		} catch (InvalidRemoteException e) {
+			Main.printLine("[OPi+][ERROR] Git Repo Processing: could not clone");
+			e.printStackTrace();
+		} catch (TransportException e) {
+			Main.printLine("[OPi+][ERROR] Git Repo Processing: could not clone");
+			e.printStackTrace();
+		} catch (GitAPIException e) {
+			Main.printLine("[OPi+][ERROR] Git Repo Processing: could not clone");
+			e.printStackTrace();
+		}
+		
+		pathToTmpFolder =  settings.pomPath.getAbsolutePath();
+		Main.printLine("[OPi+][INFO] Git Repo Processing: successfully cloned from " + settings.REMOTE_URL + " to " + settings.pomPath);
+		return true;
+	}
+	
+	
+	
+	
+	public static void setUpCommitLibrary(int COMMIT_MUTATION_CHANGE_LOWER_LIMIT){
+		commitFileLibrary = new CommitFileLibrary(COMMIT_MUTATION_CHANGE_LOWER_LIMIT);	
+		Iterable<RevCommit> history;
+        commitsID = new ArrayList<String>();
+        previousCommit = new HashMap<String,String>();
+		try {
+			//get all comits
+			history = git.log().call();
+			 for (RevCommit commit : history) {
+				 //if this is not the first commit
+				 if(commit.getParentCount()>0){
+						 processCommitToLibrary(git.getRepository(),commit,true);
+						 commitsID.add(commit.getName());
+						 previousCommit.put(commit.getName(),commit.getParent(0).getName());
+				}else{
+					Main.printLine("[OPi+][INFO] Git Repo Processing: this is the first commit in history. Therefore the entire text is a new change. This particular commit we ignore");
+				 } 
+		    }
+			 Main.printLine("[OPi+][INFO] Git Repo Processing: set up commit library containing all file changes type and created lists with previous commitID info");
+		} catch (GitAPIException e) {
+			Main.printLine("[OPi+][Error] Git Repo Processing: could not retrieve repository history");
 			e.printStackTrace();
 		}
 	}
@@ -126,64 +179,6 @@ public class GitProxy {
 		return false;
 	}
 
-	private static void setCommitsToProcess() {
-		int count=0;
-		int limit = 3;
-		Iterable<RevCommit> history;
-        commitsID = new ArrayList<String>();
-        previousCommit = new HashMap<String,String>();
-		try {
-			
-			history = git.log().call();
-			
-			 for (RevCommit commit : history) {
-				 if(commit.getParentCount()>0){
-					 if(commitPassOPiPreFilter(commit) && count<limit){ 
-				
-				//(commit.getName().equals("d4b203882f3d59020982d09c810f19a8ea6a0eab") || commit.getName().equals(""))){ 
-				//ee61cea19f2c1b7b2d9ff4fac9c36ebbc7a7061c
-				//0d237147620f1484831ab12cc87a7f242cd22b85
-						 count++;
-						 commitsID.add(commit.getName());
-						 previousCommit.put(commit.getName(),commit.getParent(0).getName());
-					 } 
-				}else{
-					Main.printLine("[OPi+][INFO] Git Repo Processing: this is the first commit in history. Therefore the entire text is a new change. This particular commit we ignore");
-				 }
-				 
-		        
-		    }
-			 Main.printLine("[OPi+][INFO] commits that are selected from this project are: "+commitsID.size());
-		    
-		} catch (GitAPIException e) {
-			Main.printLine("[OPi+][Error] Git Repo Processing: could not retrieve repository history");
-			e.printStackTrace();
-		}
-	}
-	
-	
-	/*preOPi+ filter 
-	 * 
-	 * current options: change must be made in the code = change made in src/main/java folder
-	 * */
-	private static boolean commitPassOPiPreFilter(RevCommit commit) {
-		
-		
-		boolean sw = true;
-		List<String> filesChangedInCurrentCommit = getFilesInCommit(git.getRepository(),commit,true);
-		for(String currentFilePath : filesChangedInCurrentCommit)
-			if(currentFilePath.contains("src/main/java")){
-				if(sw){
-					String[] tokens = currentFilePath.split("/");
-					groupArtifactID = tokens[3]+"."+tokens[4]+".*";
-					sw=false;
-				}
-			return true;	
-			}
-				
-		return false;
-	}
-
 
 	public static boolean hasCommits(Repository repository) {
 		if (repository != null && repository.getDirectory().exists()) {
@@ -193,18 +188,20 @@ public class GitProxy {
 		return false;
 	}
 	
-	public static List<String> getFilesInCommit(Repository repository, RevCommit commit, boolean calculateDiffStat) {
-		List<String> list = new ArrayList<String>();
-		if (!hasCommits(repository)) {
-			return list;
-		}
+	
+	
+	
+	public static void processCommitToLibrary(Repository repository, RevCommit commit, boolean calculateDiffStat) {
+		if (hasCommits(repository)) {
+			
 		RevWalk rw = new RevWalk(repository, 0);
 		try {
 			if (commit == null) {
 				ObjectId object = repository.resolve(Constants.HEAD);
 				commit = rw.parseCommit(object);
 			}
-
+			/*
+			//this is the first commit in history. this case should be ignored by previous logic
 			if (commit.getParentCount() == 0) {
 				TreeWalk tw = new TreeWalk(repository);
 				tw.reset();
@@ -221,13 +218,11 @@ public class GitProxy {
 					} catch (Throwable t) {
 						Main.printLine("[OPi+][ERROR] failed to retrieve blob size for " + tw.getPathString());
 					}			
-					list.add(tw.getPathString());
-					System.out.println("----------------------------");
-					System.out.println(tw.getOperationType()+"     "+tw.getPathString());
-					
+					list.add(new CommitFile(tw.getPathString()));
 				}
 				tw.close();
 			} else {
+			*/
 				RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
 				DiffFormatter df = new DiffFormatter(null); //commit.getName(), repository
 				df.setRepository(repository);
@@ -235,16 +230,19 @@ public class GitProxy {
 				df.setDetectRenames(true);
 				List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
 				for (DiffEntry diff : diffs) {
-					// create the path change model
-					list.add(diff.getNewPath());
-					}
+					// a diff represents a file that was changed within the current commit
+					String filePath;
+					if(diff.getChangeType().equals("DELETE"))
+						filePath = diff.getOldPath();
+					else
+						filePath = diff.getNewPath();
+					commitFileLibrary.addCommitedFileToLibrary(commit.getName(), filePath, diff.getChangeType().toString());
 				}
-			
 		} catch (Throwable t) {
-			Main.printLine("[OPi+][ERROR] preprocesing commint: failed to determine files in commit!");
+			Main.printLine("[OPi+][ERROR] preprocesing commit: failed to determine files in commit!");
+			t.printStackTrace();
 		} 
-		return list;
-	}
+	}}
 	
 	
 	
@@ -281,35 +279,50 @@ public class GitProxy {
 		
 	}
 
-	public static void getChangesFromACommit() {
-		
-		try {
-			runRepoProcessing();
-			Iterable<RevCommit> history = git.log().call();
+	
+	/*
+	 * need to add gitective project to buildpath
+	 * BUT add the local version since it had outdated method calls
+	private static void gitectiveOnCommit(RevCommit commit, RevCommit previous) {
 			
-			 for (RevCommit commit : history) {
-				 if(commit.getParentCount()>0){
-					 
-					 System.out.println(commit.getName());
-					 //System.out.println(git.diff().setOutputStream( System.out ).call());
+		CommitListFilter list = new CommitListFilter();
+		
+		
+		DiffFileCountFilter diffFileCountFilter = new DiffFileCountFilter();
+		
+		CommitFileImpactFilter commitFileIMpactFilter = new CommitFileImpactFilter(123);
+		
+		//includes commits that introduced a minimum number of line differences
+		DiffLineSizeFilter difLineSizeFilter = new DiffLineSizeFilter(10);
+	
+		AndCommitFilter filters = new AndCommitFilter(difLineSizeFilter,list);
+		
+		
+		CommitFinder finder = new CommitFinder(git.getRepository());
+		finder.setFilter(new AllCommitFilter(filters));
+		finder.setFilter(PathFilterUtils.andSuffix(".java"));
+		finder.setFilter(PathFilterUtils.and("src/main/java"));
+		//finder.findBetween(commit, previous);
+		finder.find();
+		
+		
 
-					 
-					 
-					 
-				}else{
-					Main.printLine("[OPi+][INFO] Git Repo Processing: this is the first commit in history. Therefore the entire text is a new change. This particular commit we ignore");
-				 }
-				 
-		        
-		    }
-			 
-		} catch (GitAPIException e) {
-			Main.printLine("[OPi+][Error] Git Repo Processing: could not retrieve repository history");
-			e.printStackTrace();
-		}
+		System.out.println(list.getCommits().size());
+		System.out.println(list.getCommits().toString());
+		
+		
+		
+		System.out.println("added "+diffFileCountFilter.getAdded());
+		System.out.println("copied "+diffFileCountFilter.getCopied());
+		System.out.println("deleted "+diffFileCountFilter.getDeleted());
+		System.out.println("edited "+diffFileCountFilter.getEdited());
+		System.out.println("renamed "+diffFileCountFilter.getRenamed());
+		System.out.println("total "+diffFileCountFilter.getTotal());
+		System.out.println(diffFileCountFilter.toString());
+		
 		
 	}
-
+*/
 	
 	
 }

@@ -1,25 +1,21 @@
 package operias.coverage;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import operias.OperiasStatus;
-import operias.coverage.CoberturaClass;
-import operias.coverage.CoberturaLine;
-import operias.coverage.CoberturaPackage;
-import operias.coverage.CoverageReport;
-import operias.test.general.ExitException;
-import operias.test.general.NoExitSecurityManager;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import mutation.testing.ExitRequiredException;
+import operias.OperiasStatus;
+import operias.test.general.ExitException;
+import operias.test.general.NoExitSecurityManager;
 
 public class CoverageReportTest {
 

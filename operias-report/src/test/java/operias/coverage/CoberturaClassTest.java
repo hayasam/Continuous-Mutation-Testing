@@ -1,8 +1,7 @@
 package operias.coverage;
 
-import static org.junit.Assert.*;
-import operias.coverage.CoberturaClass;
-import operias.coverage.CoberturaLine;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 

@@ -1,6 +1,5 @@
 package mutation.testing;
 
-import operias.Main;
 import operias.OperiasStatus;
 
 public class ExitRequiredException extends Exception {

@@ -1,25 +1,11 @@
 package mutation.testing;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.errors.SymlinksNotSupportedException;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import operias.Configuration;
 import operias.Main;
-import operias.OperiasStatus;
-import operias.coverage.CoverageReport;
-import operias.diff.DiffFile;
-import operias.diff.DiffReport;
 import operias.report.OperiasFile;
 import operias.report.OperiasReport;
 import operias.report.change.ChangeSourceChange;
