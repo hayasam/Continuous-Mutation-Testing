@@ -40,9 +40,9 @@ public class EvaluationCrashStatus {
 	
 	
 	
-	public static void recordPitestCrash(String commitID){
+	public static void recordPitestCrash(String[] strings){
 		PitestCrash++;
-		write("Pitest Crash"+SEPARATOR+commitID);
+		write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
 	}
 	
 	public static void recordOperiasCrash(String commitID, String cause){

@@ -8,14 +8,19 @@ import operias.Main;
 
 public class EvaluationRunner {
 	
-	
+	public static String scmConnection;
+	public static String scmURL;
+	public static String scmTag;
+	public static String scmDevConnection;
+	public static String jUnitVersion;
 
 	public static void main(String[] args){
 		
 		//RUN EVALUATION
 		
 		//set up the project
-		String REMOTE_URL = "https://github.com/jhy/jsoup";
+		String REMOTE_URL = "https://github.com/ileontiuc/jsoup";
+				//"https://github.com/jhy/jsoup";
 				//"https://github.com/ileontiuc/commons-text";
 				//"https://github.com/ileontiuc/testSettings"; 
 				
@@ -23,6 +28,13 @@ public class EvaluationRunner {
 		String MAVEN_PATH = "/usr/share/maven";
 		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 2;
 		String localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
+		
+		//JSoup
+		scmConnection="scm:git:https://github.com/jhy/jsoup.git";
+		scmURL="https://github.com/jhy/jsoup";
+		scmTag="HEAD";
+		scmDevConnection="scm:git:git@github.com:jhy/jsoup.git";
+		jUnitVersion="4.10";
 		
 		
 		ThirdPartyProxySeetings settings = new ThirdPartyProxySeetings(REMOTE_URL, MAVEN_PATH);
@@ -63,6 +75,10 @@ public class EvaluationRunner {
 				EvaluationCrashStatus.recordOperiasCrash(commitID, e.getCause().toString());
 				e.printStackTrace();
 				
+			} catch (PiTestException e) {
+				System.out.println("[OPi+][ERROR]------------------------------------------------Pitest crashed for commit: "+commitID);
+				EvaluationCrashStatus.recordPitestCrash(e.getInfo());
+				e.printStackTrace();
 			}
 		}
 		
@@ -82,7 +98,7 @@ public class EvaluationRunner {
 		}
 	}
 
-	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) throws ExitRequiredException{
+	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) throws ExitRequiredException, PiTestException{
 				
 		String[] arguments = { "-oru", repoLink,
 							   "-rru", repoLink,

@@ -18,7 +18,7 @@ public class OPi {
 	private ArrayList<MutatedFile> mutatedFiles;
 	OperiasReport operiasReport;
 
-	public OPi(OperiasReport operiasReport) {
+	public OPi(OperiasReport operiasReport) throws PiTestException {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();

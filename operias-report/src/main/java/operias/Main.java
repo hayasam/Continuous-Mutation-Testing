@@ -18,13 +18,14 @@ public class Main {
 	 * Start up the operias tool
 	 * @param args Contains serveral arguments, for example the source directories which
 	 * needs to be compared and to which branch it must be compared.
+	 * @throws PiTestException 
 	 * 
 	 
 	 * 
 	 */
 	
 	
-	public static void mutatedOperias(String[] args) throws ExitRequiredException{
+	public static void mutatedOperias(String[] args) throws ExitRequiredException, PiTestException{
 		
 		Configuration.parseArguments(args);
 		// Check if the directories were set
