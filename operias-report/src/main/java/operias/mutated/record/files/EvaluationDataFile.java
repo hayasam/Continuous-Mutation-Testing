@@ -1,10 +1,12 @@
-package mutation.testing;
+package operias.mutated.record.files;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+
+import operias.Main;
 
 public class EvaluationDataFile {
 
@@ -17,12 +19,12 @@ public class EvaluationDataFile {
 			String fileName = projectName+"DATA";
 			evaluationDATAFileName = path+"/"+fileName+".csv";
 			File file = new File(path+"/"+fileName+".csv");
-			System.out.println(path+"/"+fileName+".csv");
+			Main.printLine(path+"/"+fileName+".csv");
 			      
 			if (file.createNewFile()){
-			    System.out.println("[OPi+][INFO] File "+fileName+" is created!");
+				Main.printLine("[OPi+][INFO] File "+fileName+" is created!");
 			}else{
-			     System.out.println("[OPi+][ERROR] File already exists.");
+				Main.printLine("[OPi+][ERROR] File already exists.");
 			}
 			      
 			fos = new FileOutputStream(file);

@@ -3,9 +3,9 @@ package operias.coverage;
 import java.io.File;
 import java.io.IOException;
 
-import mutation.testing.ExitRequiredException;
 import operias.Main;
 import operias.OperiasStatus;
+import operias.mutated.exceptions.ExitRequiredException;
 
 /**
  * This class is used to execute cobertura for a maven project

@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import mutation.testing.ExitRequiredException;
+import operias.mutated.exceptions.ExitRequiredException;
 import operias.test.general.NoExitSecurityManager;
 @Ignore
 public class ConfigurationTest {

@@ -1,5 +1,6 @@
-package mutation.testing;
+package operias.mutated.exceptions;
 
+import operias.Main;
 import operias.OperiasStatus;
 
 public class ExitRequiredException extends Exception {
@@ -11,7 +12,7 @@ public class ExitRequiredException extends Exception {
 		
 
 		public ExitRequiredException(OperiasStatus errorFileDiffReportGeneration) {
-			System.out.println(errorFileDiffReportGeneration.toString());
+			Main.printLine(errorFileDiffReportGeneration.toString());
 		}
 
 		

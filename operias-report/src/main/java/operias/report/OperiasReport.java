@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import mutation.testing.ExitRequiredException;
 import operias.Main;
 import operias.coverage.CoberturaClass;
 import operias.coverage.CoberturaPackage;
@@ -13,6 +12,7 @@ import operias.diff.DiffDirectory;
 import operias.diff.DiffFile;
 import operias.diff.DiffReport;
 import operias.diff.SourceDiffState;
+import operias.mutated.exceptions.ExitRequiredException;
 
 /**
  * Operias Report class.

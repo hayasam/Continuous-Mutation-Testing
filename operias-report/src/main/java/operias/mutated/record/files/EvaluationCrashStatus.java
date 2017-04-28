@@ -1,4 +1,4 @@
-package mutation.testing;
+package operias.mutated.record.files;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -6,11 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import operias.Main;
+
 public class EvaluationCrashStatus {
 
 	
-	public static int PitestCrash;
-	public static int OperiasCrash;
+	public static int pitestCrash;
+	public static int operiasCrash;
+	public static int systemCrash;
 	private static String SEPARATOR = "|@| ";
 	
 	private static BufferedWriter bw;
@@ -19,18 +22,19 @@ public class EvaluationCrashStatus {
 	
 	public EvaluationCrashStatus(String projectName, String path) throws IOException{
 		
-		PitestCrash=0;
-		OperiasCrash=0;
+		pitestCrash=0;
+		operiasCrash=0;
+		systemCrash=0;
 		
 		String fileName = projectName+"CRASH";
 		evaluationDATAFileName = path+"/"+fileName+".csv";
 		File file = new File(path+"/"+fileName+".csv");
-		System.out.println(path+"/"+fileName+".csv");
+		Main.printLine(path+"/"+fileName+".csv");
 		      
 		if (file.createNewFile()){
-		    System.out.println("[OPi+][INFO] File "+fileName+" is created!");
+			Main.printLine("[OPi+][INFO] File "+fileName+" is created!");
 		}else{
-		     System.out.println("[OPi+][ERROR] File already exists.");
+			Main.printLine("[OPi+][ERROR] File already exists.");
 		}
 		      
 		fos = new FileOutputStream(file);
@@ -41,13 +45,18 @@ public class EvaluationCrashStatus {
 	
 	
 	public static void recordPitestCrash(String[] strings){
-		PitestCrash++;
+		pitestCrash++;
 		write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
 	}
 	
 	public static void recordOperiasCrash(String commitID, String cause){
-		OperiasCrash++;
+		operiasCrash++;
 		write("Operias Crash "+SEPARATOR+" "+commitID+" "+SEPARATOR+" "+cause);
+	}
+	
+	public static void recordSystemCrash(String[] info){
+		systemCrash++;
+		write("System Crash "+SEPARATOR+" "+info[0]+" "+SEPARATOR+" "+info[1]+" "+SEPARATOR+" "+info[2]);
 	}
 	
 	

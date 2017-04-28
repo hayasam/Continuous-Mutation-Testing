@@ -5,12 +5,13 @@ import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import mutation.testing.ExitRequiredException;
-import mutation.testing.OPi;
-import mutation.testing.PiTestException;
 import operias.coverage.Cobertura;
 import operias.coverage.CoverageReport;
 import operias.diff.DiffReport;
+import operias.mutated.OPi;
+import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.PiTestException;
+import operias.mutated.exceptions.SystemException;
 import operias.output.html.HTMLReport;
 import operias.output.xml.XMLReport;
 import operias.report.OperiasReport;
@@ -37,8 +38,9 @@ public class Operias {
 	 * Construct a report based on the difference in source files and coverage between the two folders in the configuration
 	 * @return Operias instance
 	 * @throws PiTestException 
+	 * @throws SystemException 
 	 */
-	public Operias constructReport() throws ExitRequiredException, PiTestException{
+	public Operias constructReport() throws ExitRequiredException, PiTestException, SystemException{
 
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
 			Main.printLine("[Error] Missing either the original or the revised directory");
@@ -91,7 +93,7 @@ public class Operias {
 			
 			Main.printLine("[Info] Start to combine reports");
 			
-			System.out.println("-----------------------------output from threads after join");
+			Main.printLine("-----------------------------output from threads after join");
 			if(clock){
 				
 				report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
@@ -103,7 +105,7 @@ public class Operias {
 						
 		} catch (InterruptedException e1) {
 			//System.exit(OperiasStatus.ERROR_THREAD_JOINING.ordinal());
-			System.out.println("[Operias] error when joining threads");
+			Main.printLine("[Operias] error when joining threads");
 			throw new ExitRequiredException(OperiasStatus.ERROR_THREAD_JOINING);
 		}
 		

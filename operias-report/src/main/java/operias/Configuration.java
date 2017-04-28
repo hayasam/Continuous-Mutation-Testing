@@ -3,8 +3,8 @@ package operias;
 import java.io.File;
 import java.security.InvalidParameterException;
 
-import mutation.testing.ExitRequiredException;
 import operias.git.Git;
+import operias.mutated.exceptions.ExitRequiredException;
 
 
 /**
@@ -89,9 +89,9 @@ public class Configuration {
 	private static String temporaryDirectory = (new File("temp")).getAbsolutePath();
 	
 	/**
-	 * By default, output is disabled
+	 * By default, output is enabled
 	 */
-	private static boolean outputEnabled = false;
+	private static boolean outputEnabled = true;
 	
 	/**
 	 * Parse the arguments passed by the command line

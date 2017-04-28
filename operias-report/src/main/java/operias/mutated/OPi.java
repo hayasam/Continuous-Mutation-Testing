@@ -1,4 +1,4 @@
-package mutation.testing;
+package operias.mutated;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -6,6 +6,10 @@ import java.util.List;
 
 import operias.Configuration;
 import operias.Main;
+import operias.mutated.exceptions.PiTestException;
+import operias.mutated.exceptions.SystemException;
+import operias.mutated.proxy.PitestProxy;
+import operias.mutated.record.files.EvaluationFileWriter;
 import operias.report.OperiasFile;
 import operias.report.OperiasReport;
 import operias.report.change.ChangeSourceChange;
@@ -18,7 +22,7 @@ public class OPi {
 	private ArrayList<MutatedFile> mutatedFiles;
 	OperiasReport operiasReport;
 
-	public OPi(OperiasReport operiasReport) throws PiTestException {
+	public OPi(OperiasReport operiasReport) throws PiTestException, SystemException {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
@@ -52,19 +56,19 @@ public class OPi {
 
 	
 
-	private void processMutatedCommit(String pitestReportsPath) {
+	private void processMutatedCommit(String pitestReportsPath) throws SystemException {
 		
 		for(MutatedFile currentMutatedFile : mutatedFiles){
-			System.out.println("[OPi+][INFO] Processing each file in commit "+currentMutatedFile.getCommitID());
+			Main.printLine("[OPi+][INFO] Processing each file in commit "+currentMutatedFile.getCommitID());
 			
-			System.out.println("my path for pitest reports is "+pitestReportsPath);
-			System.out.println("the file that was changed in the same commit is: "+currentMutatedFile.getSystemFileName());
+			Main.printLine("my path for pitest reports is "+pitestReportsPath);
+			Main.printLine("the file that was changed in the same commit is: "+currentMutatedFile.getSystemFileName());
 			
 			// /tmp/TestGitRepository6589134661357336768/target/pit-reports/201704041512/groupID.artifactID/BankAccount.java.html
 			
 			String currentPitestReport = pitestReportsPath;
 			currentMutatedFile.setMutationReportPath(currentPitestReport);	
-			System.out.println("path for current file: "+currentPitestReport);
+			Main.printLine("path for current file: "+currentPitestReport);
 		}
 	}
 
@@ -95,20 +99,20 @@ public class OPi {
 			//obs: might be different for update and change; maybe use size of revisedCoverage
 			
 			List<Boolean> codeChunkAdded = currentChange.getRevisedCoverage();
-			System.out.println("in the current change there are "+currentChange.getRevisedCoverage().size()+" lines affected");
+			Main.printLine("in the current change there are "+currentChange.getRevisedCoverage().size()+" lines affected");
 			for(int i = firstLineAdded; i<=lastLineAdded; i++){
 				
 				if(codeChunkAdded.get(i-firstLineAdded)!=null && codeChunkAdded.get(i-firstLineAdded)){
 					diffCoveredLines.add(i+1);
-					System.out.println("[OPi+][INFO] A line that changed and covered is in new version at: "+(i+1));
-					System.out.println(diffCoveredLines.toString());
+					Main.printLine("[OPi+][INFO] A line that changed and covered is in new version at: "+(i+1));
+					Main.printLine(diffCoveredLines.toString());
 				}
 			}
-			System.out.println("[OPi+] We have "+ diffCoveredLines.size()+" lines to mutate");
-			System.out.println("[OPi+] The lines that are covered AND changed are: "+ diffCoveredLines.toString());
+			Main.printLine("[OPi+] We have "+ diffCoveredLines.size()+" lines to mutate");
+			Main.printLine("[OPi+] The lines that are covered AND changed are: "+ diffCoveredLines.toString());
 			
 		}else if(currentChange instanceof DeleteSourceChange){
-			System.out.println("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition()+" for " +currentChange.getSourceDiffDelta().getRevised().size()+" rows");
+			Main.printLine("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition()+" for " +currentChange.getSourceDiffDelta().getRevised().size()+" rows");
 			//!!! this information has to be processed. it does not give correct line number for latter lines
 			
 		}else {

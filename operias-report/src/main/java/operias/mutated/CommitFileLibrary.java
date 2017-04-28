@@ -1,4 +1,4 @@
-package mutation.testing;
+package operias.mutated;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import operias.Main;
+import operias.mutated.record.files.EvaluationDataFile;
 
 public class CommitFileLibrary{
 
@@ -24,12 +25,13 @@ public class CommitFileLibrary{
 		if(prefilteredCommitID.isEmpty()){
 			for(String commitID: commitFileLibrary.keySet()){
 				if(OPiPrefilter(commitFileLibrary.get(commitID),commitID)){
-					prefilteredCommitID.add(commitID);
+					//if(commitID.equals("13b55d7e81414d2a96de3bdc8dd95829fd7dad92"))
+						prefilteredCommitID.add(commitID);
 				}
 			}
 			
 					
-			
+			//record project and process data
 			int totalNumberCommits = commitFileLibrary.size();
 			int prefilterdCommits = prefilteredCommitID.size();
 			float percentajePrefiltered = prefilterdCommits*100/totalNumberCommits;
@@ -37,9 +39,9 @@ public class CommitFileLibrary{
 			EvaluationDataFile.write("Total commits analyzed by OPi+: "+prefilterdCommits+" which is "+percentajePrefiltered+"%");
 			EvaluationDataFile.write("Total commits filtered out by OPi+: "+(totalNumberCommits-prefilterdCommits)+" which is "+(100-percentajePrefiltered)+"%");
 			
-			System.out.println("[OPi+][INFO] total number of commits for this system: "+commitFileLibrary.size());
-			System.out.println("[OPi+][INFO] Total commits analyzed by OPi+: "+prefilterdCommits+" which is "+percentajePrefiltered+"%");
-			System.out.println("Total commits filtered out by OPi+: "+(totalNumberCommits-prefilterdCommits)+" which is "+(100-percentajePrefiltered)+"%");
+			Main.printLine("[OPi+][INFO] total number of commits for this system: "+commitFileLibrary.size());
+			Main.printLine("[OPi+][INFO] Total commits analyzed by OPi+: "+prefilterdCommits+" which is "+percentajePrefiltered+"%");
+			Main.printLine("Total commits filtered out by OPi+: "+(totalNumberCommits-prefilterdCommits)+" which is "+(100-percentajePrefiltered)+"%");
 			
 		}
 		return prefilteredCommitID;

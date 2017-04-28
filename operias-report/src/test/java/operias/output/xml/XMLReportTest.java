@@ -18,10 +18,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
-import mutation.testing.ExitRequiredException;
 import operias.Configuration;
 import operias.coverage.CoverageReport;
 import operias.diff.DiffReport;
+import operias.mutated.exceptions.ExitRequiredException;
 import operias.report.OperiasReport;
 
 public class XMLReportTest {

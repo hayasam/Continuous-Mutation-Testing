@@ -5,7 +5,11 @@ import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 
-import mutation.testing.*;
+import operias.mutated.*;
+import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.PiTestException;
+import operias.mutated.exceptions.SystemException;
+import operias.mutated.record.files.EvaluationOPiLogFile;
 
 /**
  * Main class of operias
@@ -19,13 +23,14 @@ public class Main {
 	 * @param args Contains serveral arguments, for example the source directories which
 	 * needs to be compared and to which branch it must be compared.
 	 * @throws PiTestException 
+	 * @throws SystemException 
 	 * 
 	 
 	 * 
 	 */
 	
 	
-	public static void mutatedOperias(String[] args) throws ExitRequiredException, PiTestException{
+	public static void mutatedOperias(String[] args) throws ExitRequiredException, PiTestException, SystemException{
 		
 		Configuration.parseArguments(args);
 		// Check if the directories were set
@@ -59,7 +64,7 @@ public class Main {
 	 */
 	public static void printLine(String line) {
 		if(Configuration.isOutputEnabled()) {
-			System.out.println(line);
+			EvaluationOPiLogFile.write(line);
 		}
 	}
 

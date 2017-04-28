@@ -1,4 +1,4 @@
-package mutation.testing;
+package operias.mutated.proxy;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,22 +8,18 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
 import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.InvocationResult;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
-import org.apache.maven.shared.invoker.PrintStreamHandler;
-import org.apache.maven.shared.invoker.SystemOutHandler;
-import org.eclipse.jgit.attributes.Attribute;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -31,6 +27,9 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import operias.Main;
+import operias.mutated.EvaluationRunner;
+import operias.mutated.exceptions.PiTestException;
+import operias.mutated.exceptions.SystemException;
 
 public class PitestProxy {
 	
@@ -40,7 +39,7 @@ public class PitestProxy {
 
 	
 		
-	public static String getMutationReportFor(String commitID) throws PiTestException {
+	public static String getMutationReportFor(String commitID) throws PiTestException, SystemException {
 		/* due to Pitest run on last commit feature limitation we have to update the head 
 		 * each time to run the evaluation = running pitest on specific commit not just the last one
 		*/
@@ -73,7 +72,7 @@ public class PitestProxy {
         //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
         
         //-l logfile.txt
-        
+        //mvn console output is stored in logfile.txt
 		
         
         //run Pitest on last commit
@@ -85,14 +84,18 @@ public class PitestProxy {
 	        {
 	            throw new IllegalStateException( "Build failed." );
 	        }else{
-	        	System.out.println("--------!!!!!!!!!!--------------!!!!!!!!!!!!!!");
-	        	
-	        	
-	        	Main.printLine("[OPi+][INFO] successfully run Pitest on last commit");
-	        	mutationPath = settings.pomPath+"/target/pit-reports";
-	        	mutationPath = getLatestFilefromDir(mutationPath).getAbsolutePath();
-	        	
-	        	System.out.println("[OPi+][INFO] My MUTATION REPORT path is: "+mutationPath+" for commit "+commitID);
+	        	/* the build still succeeds if no mutations are found. 
+	        	 * in this case there is no path for the mutation report 
+	        	 * and there is no need to further analyze
+	        	 */
+	        	File logFilePath =  new File( settings.pomPath.getAbsolutePath()+"/logfile.txt");
+	        	if(isPitestAnalysis(logFilePath, commitID)){
+	        		Main.printLine("[OPi+][INFO] successfully run Pitest on last commit");
+		        	mutationPath = settings.pomPath+"/target/pit-reports";
+		        	mutationPath = getLatestFilefromDir(mutationPath).getAbsolutePath();
+		        	
+		        	Main.printLine("[OPi+][INFO] My MUTATION REPORT path is: "+mutationPath+" for commit "+commitID);
+	        	}
 	        }
 		} catch (MavenInvocationException|IllegalStateException e) {
 			Main.printLine("[OPi+][ERROR] could not run Pitest on last commit");
@@ -105,6 +108,23 @@ public class PitestProxy {
 	}
 	
 	
+	private static boolean isPitestAnalysis(File logFilePath, String commitID) throws SystemException, PiTestException {
+		
+		try{
+			
+			if(FileUtils.readFileToString(logFilePath).contains("[INFO] No modified files found - nothing to mutation test")){
+				throw new PiTestException(commitID, "Pitest did not detect any change");
+			}
+			if(FileUtils.readFileToString(logFilePath).contains("No mutations found.")){
+				throw new PiTestException(commitID, "Pitest did not generate any mutations");
+			}
+			return true;
+		} catch(IOException e){
+			e.printStackTrace();
+			throw new SystemException(commitID, "Could not read logFile for Pitest", e);
+		}
+	}
+
 	private static void updatePomFileForMutationProcess(File pomFile) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		
 		//open pom file

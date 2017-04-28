@@ -1,5 +1,6 @@
-package mutation.testing;
+package operias.mutated.exceptions;
 
+import operias.Main;
 import operias.OperiasStatus;
 
 public class PiTestException extends Exception{
@@ -16,7 +17,7 @@ public class PiTestException extends Exception{
 
 	  @Override
 	  public void printStackTrace(){
-		  System.out.println("Error for commit "+commit+" because "+reason);
+		  Main.printLine("Error for commit "+commit+" because "+reason);
 	  }
 		
 	  public String[] getInfo(){

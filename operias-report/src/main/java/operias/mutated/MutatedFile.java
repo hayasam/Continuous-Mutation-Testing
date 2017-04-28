@@ -1,4 +1,4 @@
-package mutation.testing;
+package operias.mutated;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,6 +10,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import operias.Main;
+import operias.mutated.exceptions.SystemException;
+import operias.mutated.record.files.EvaluationFileWriter;
 
 public class MutatedFile {
 
@@ -28,12 +30,19 @@ public class MutatedFile {
 	
 	
 	
-	public void setMutationReportPath(String path){
+	public void setMutationReportPath(String path) throws SystemException{
 		String[] tokens = systemFileName.split("/");
 		
 		//TODO jsoup hack
-		//String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
-		String mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
+		String mutationReportPath = null;
+		if(tokens.length==8){
+			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
+		}else if(tokens.length==7){
+			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+".html";
+		}else{
+			throw new SystemException(commitID, "Can`t parse path to mutation report", new Exception("cant parse mutation report"));
+		}
+		
 		this.mutationReportPath = mutationReportPath;
 		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
 		

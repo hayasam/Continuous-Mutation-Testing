@@ -12,9 +12,9 @@ import java.util.LinkedList;
 
 import org.junit.Test;
 
-import mutation.testing.ExitRequiredException;
 import operias.coverage.CoverageReport;
 import operias.diff.DiffReport;
+import operias.mutated.exceptions.ExitRequiredException;
 import operias.output.html.HTMLReport;
 import operias.report.change.ChangeSourceChange;
 import operias.report.change.CoverageIncreaseChange;

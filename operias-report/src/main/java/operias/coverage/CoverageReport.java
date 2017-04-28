@@ -12,8 +12,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import mutation.testing.ExitRequiredException;
 import operias.OperiasStatus;
+import operias.mutated.exceptions.ExitRequiredException;
 
 public class CoverageReport {
 

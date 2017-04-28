@@ -12,8 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import mutation.testing.ExitRequiredException;
 import operias.OperiasStatus;
+import operias.mutated.exceptions.ExitRequiredException;
 import operias.test.general.ExitException;
 import operias.test.general.NoExitSecurityManager;
 
