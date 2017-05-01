@@ -36,10 +36,7 @@ public class PitestProxy {
 	public static ThirdPartyProxySeetings settings;
 	
 	
-
-	
-		
-	public static String getMutationReportFor(String commitID) throws PiTestException, SystemException {
+	public static String getMutationReportFor(String commitID, boolean previousCommit) throws PiTestException, SystemException {
 		/* due to Pitest run on last commit feature limitation we have to update the head 
 		 * each time to run the evaluation = running pitest on specific commit not just the last one
 		*/
@@ -57,10 +54,20 @@ public class PitestProxy {
         try {
 			updatePomFileForMutationProcess(pomFile);
 		} catch (ParserConfigurationException|SAXException|IOException|TransformerException e1) {
-			throw new PiTestException(commitID,"could not parse and edit pom file ");
+			if(previousCommit){
+				throw new PiTestException(commitID,"could not parse and edit pom file ","PREVIOUS");
+			}else{
+				throw new PiTestException(commitID,"could not parse and edit pom file ");
+			}
+			
 		} catch (Exception e){
 			e.printStackTrace();
-			throw new PiTestException(commitID,"fault in my logic when parsing the pom file ");
+			if(previousCommit){
+				throw new PiTestException(commitID,"fault in my logic when parsing the pom file ", "PREVIOUS");
+			}else{
+				throw new PiTestException(commitID,"fault in my logic when parsing the pom file ");
+			}
+			
 			
 		}
         

@@ -51,6 +51,7 @@ public class Main {
 			FileUtils.deleteDirectory(new File(Configuration.getTemporaryDirectory()));
 		} catch (IOException e) {
 			e.printStackTrace();
+			//not being able to delete the temporrary folders from operias does not influence the evaluation process
 		}
 		
 		
@@ -65,6 +66,7 @@ public class Main {
 	public static void printLine(String line) {
 		if(Configuration.isOutputEnabled()) {
 			EvaluationOPiLogFile.write(line);
+			System.out.println(line);
 		}
 	}
 

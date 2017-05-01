@@ -2,6 +2,7 @@ package operias.mutated;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import org.jsoup.Jsoup;
@@ -9,47 +10,60 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import operias.Configuration;
 import operias.Main;
+import operias.mutated.exceptions.FileException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.record.files.EvaluationFileWriter;
 
 public class MutatedFile {
 
 	private String systemFileName;
+	private String fileName;
 	private String mutationReportPath;
 	private String commitID;
+	private ArrayList<Line> diffLines;
 	private ArrayList<Integer> diffCoveredLines;
-	private ArrayList<InflexionPoint> inflexionPoints;
 	
-	public MutatedFile(String fileName, ArrayList<Integer> diffCoveredLines, String commitID){
-		this.diffCoveredLines = diffCoveredLines;
+	
+	public MutatedFile(String fileName, ArrayList<Line> diffLines, String commitID){
+		this.diffLines = diffLines;
 		this.systemFileName = fileName;
 		this.commitID = commitID;
-		inflexionPoints = new ArrayList<InflexionPoint>();
+		this.fileName = "";
+		this.diffCoveredLines = new ArrayList<Integer>();
+		for(Line currentLine: diffLines){
+			if(currentLine.hasTestCoverage()){
+				this.diffCoveredLines.add(currentLine.getNumber());
+			}
+		}
 	}
 	
+	public ArrayList<Line> getDiffLines(){
+		return diffLines;
+	}
 	
+	public int getFileCommitImpact(){
+		return diffLines.size();
+	}
 	
-	public void setMutationReportPath(String path) throws SystemException{
+	public void setMutationReportPath(String path) throws SystemException, FileException{
 		String[] tokens = systemFileName.split("/");
 		
 		//TODO jsoup hack
 		String mutationReportPath = null;
 		if(tokens.length==8){
 			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
+			fileName=tokens[7];
 		}else if(tokens.length==7){
-			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+".html";
+			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
+			fileName=tokens[6];
 		}else{
-			throw new SystemException(commitID, "Can`t parse path to mutation report", new Exception("cant parse mutation report"));
+			throw new FileException(commitID, "Can`t parse path to mutation report");
 		}
 		
 		this.mutationReportPath = mutationReportPath;
 		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
-		
-		EvaluationFileWriter.setFileName(tokens[6]);
-		EvaluationFileWriter.setPath(systemFileName);
-		
-		extractMutationReport();
 	}
 	
 	
@@ -71,13 +85,12 @@ public class MutatedFile {
 		return mutationReportPath;
 	}
 	
-	private void extractMutationReport() {
+	public void extractMutationReport() throws SystemException {
 		File mutationReport = new File(this.mutationReportPath);
-		
 		Document doc;
 		try {
 			doc = Jsoup.parse(mutationReport, "UTF-8", "http://example.com/");
-			//these are lines that have mutants created fot them and are covered my tests
+			//these are lines that have mutants created for them and are covered my tests
 			Elements coveredContent = doc.getElementsByAttributeValue("class", "covered");
 				
 			//these are lines that have mutants created for them BUT there is no test coverage
@@ -87,67 +100,93 @@ public class MutatedFile {
 			Elements noAvailableOperator = doc.getElementsByAttributeValue("class", "na");
 			
 			
-			
-			
-			if(noAvailableOperator.size()>0){
-				//TODO if line has no mutants BUT was changed then it has BLUE-2 output!!
-				//ALSO talk to Arie: if line has mutants but no test coverage do we considet that critical area that should be tested? do we take it into consideration for the evaluation??
-				
-				Main.printLine("[OPi+][BLUE-2??]");
-				
+			//process all coveredContent
+			int counter =0;
+			while(counter<coveredContent.size()){
+				int codeLineNumber = Integer.parseInt(coveredContent.get(counter).ownText());
+				Line line = lineArrayContains(diffLines, codeLineNumber);
+				if(line != null){
+					processChangedCoveredMutants(counter, coveredContent, line);
+					counter++;
+				}else{
+					counter++;
+				}
+				counter++;
 			}
 			
 			
-			//actual covered content = size/2;
-			parseSetToInflexionPoints(coveredContent,diffCoveredLines);
+			//process noTestCoverageContent
+			counter =0;
+			while(counter<noTestCoverageContent.size()){
+				int codeLineNumber = Integer.parseInt(noTestCoverageContent.get(counter).ownText());
+				Line line = lineArrayContains(diffLines, codeLineNumber);
+				if(line != null){
+					//TODO test
+					
+					//>0 no coverage mutants => blue 1
+					line.setBlueOutput("1");
+					//otherwise blue 2/3
+					
+					counter++;
+				}else{
+					counter++;
+				}
+				counter++;
+			}
 			
-		
-			Main.printLine("[OPi+][INFO] Total number of inflexion points: "+inflexionPoints.size());	
 			
-			
+			//process noAvailableOperator
+			counter =0;
+			while(counter<noAvailableOperator.size()){
+				int codeLineNumber = Integer.parseInt(noAvailableOperator.get(counter).ownText());
+				Line line = lineArrayContains(diffLines, codeLineNumber);
+				if(line != null){
+					//TODO test
+					line.setBlueOutput("2/3");					
+					counter++;
+				}else{
+					counter++;
+				}
+				counter++;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			throw new SystemException(Configuration.getRevisedCommitID(), "could not parse OPi+ mutation report", e);
 		}	
 	}
 	
-	private void parseSetToInflexionPoints(Elements content, ArrayList<Integer> diffCoveredLines){
-		int counter =0;
-		while(counter<content.size()){
-			int codeLineNumber = Integer.parseInt(content.get(counter).ownText());
-			if(diffCoveredLines.contains(codeLineNumber)){
-				//process mutants for this line of code (changed and also covered)
-				Element mutationInfo = content.get(counter).nextElementSibling();
-				ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
-				
-				EvaluationFileWriter.setLineNumber(codeLineNumber);
-				
-				if(!mutationInfo.text().isEmpty()){  //line has mutants
-					survivingMutants = processMutantsInfo(mutationInfo.text());
-					counter++;
-					String codeLine = content.get(counter).text();
-					
-					EvaluationFileWriter.setNewCodeLine(codeLine);
-					EvaluationFileWriter.setBlueOutput("5");
-					inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, survivingMutants));
-					Main.printLine("[OPi+][BLUE-5] created new inflexion point "+codeLineNumber);
-					
-				}else{
-					counter++;
-					//TODO expand this to blue 2 and blue 3
-					EvaluationFileWriter.setNewCodeLine(content.get(counter).ownText());
-					EvaluationFileWriter.setBlueOutput("2/3");
-					EvaluationFileWriter.writeInFile("");
-					Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+codeLineNumber+"   "+content.get(counter).ownText());
-				}
-			}else{
-				counter++;
-			}
+	
+	
+	
+
+	private void processChangedCoveredMutants(int counter, Elements coveredContent, Line line ) throws SystemException {
+		//process mutants for this line of code (changed and also covered)
+		Element mutationInfo = coveredContent.get(counter).nextElementSibling();
+		ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
+		
+		if(!mutationInfo.text().isEmpty()){  //line has mutants
+			processMutantsInfo(mutationInfo.text(), line);
 			counter++;
+		}else{
+			counter++;
+			//TODO expand this to blue 2 and blue 3
+			line.setBlueOutput("2/3");
+			Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+line.getNumber()+"   "+coveredContent.get(counter).ownText());
 		}
+		
+	}
+
+	private Line lineArrayContains(ArrayList<Line> lines, int lineNumber){
+		for(Line line: lines){
+			if(line.getNumber()==lineNumber){
+				return line;
+			}
+		}
+		return null;
 	}
 	
 	
-	private ArrayList<Mutation> processMutantsInfo(String info){
+	private void processMutantsInfo(String info, Line line) throws SystemException{
 		
 		
 		int numberOfMutantsForLine = Integer.parseInt(info.split(" ")[0]);
@@ -162,12 +201,25 @@ public class MutatedFile {
 				String mutantDescription = description.substring(0, endOfDescription);
 				String mutantName = parseDescriptionToMutantName(description);
 				mutations.add(new Mutation(mutantName, mutantDescription, status));
+				line.incrementSuvived();
+			}else if (description.contains("KILLED")){
+				line.incrementKilled();
+			//TODO test this
+			}else if(description.contains("NO COVERAGE")){
+				line.incrementNoCoverage();
 			}else{
-				status = "KILLED";
+				throw new SystemException(Configuration.getRevisedCommitID(), "this shouldnot happend. these mutants are covered??", new Exception("mutant should be covered here"));
 			}
-			//OBS: i do not record killed mutants. not in the scope of this exercise
 		}
-		return mutations;
+		if(mutations.isEmpty()){
+			line.setBlueOutput("4");
+			Main.printLine("[OPi+][BLUE-4] all mutants are killed by tests for "+line.getNumber());
+		}else{
+			line.setSurvivedMutantList(mutations);
+			line.setBlueOutput("5");
+			Main.printLine("[OPi+][BLUE-5] we have surviving mutants for line "+line.getNumber());
+		}
+		
 	}
 	
 	
@@ -229,4 +281,53 @@ public class MutatedFile {
 		System.out.println(diffCoveredLines);
 		
 	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	
+	
+	/*
+	 private void parseSetToInflexionPoints(Elements content, ArrayList<Integer> diffCoveredLines){
+		int counter =0;
+		while(counter<content.size()){
+			int codeLineNumber = Integer.parseInt(content.get(counter).ownText());
+			
+			if(diffCoveredLines.contains(codeLineNumber)){
+				//process mutants for this line of code (changed and also covered)
+				Element mutationInfo = content.get(counter).nextElementSibling();
+				ArrayList<Mutation> survivingMutants = new ArrayList<Mutation>();
+				
+				EvaluationFileWriter.setLineNumber(codeLineNumber);
+				
+				if(!mutationInfo.text().isEmpty()){  //line has mutants
+					survivingMutants = processMutantsInfo(mutationInfo.text());
+					counter++;
+					String codeLine = content.get(counter).text();
+					
+					EvaluationFileWriter.setNewCodeLine(codeLine);
+					EvaluationFileWriter.setBlueOutput("5");
+					inflexionPoints.add(new InflexionPoint(codeLineNumber, codeLine, survivingMutants));
+					Main.printLine("[OPi+][BLUE-5] created new inflexion point "+codeLineNumber);
+					
+				}else{
+					counter++;
+					//TODO expand this to blue 2 and blue 3
+					EvaluationFileWriter.setNewCodeLine(content.get(counter).ownText());
+					EvaluationFileWriter.setBlueOutput("2/3");
+					EvaluationFileWriter.writeInFile("");
+					Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+codeLineNumber+"   "+content.get(counter).ownText());
+				}
+			}else{
+				counter++;
+			}
+			counter++;
+		}
+	}
+	
+	
+	 * 
+	 */
+	
 }

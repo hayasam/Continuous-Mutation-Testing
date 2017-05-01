@@ -10,16 +10,22 @@ import operias.mutated.record.files.EvaluationDataFile;
 
 public class CommitFileLibrary{
 
-	private Map<String, List<CommitFile>> commitFileLibrary;
+	public static Map<String, List<CommitFile>> commitFileLibrary;  //commitID, commited files
+	public static Map<String, Integer> commitImpact; 
 	private int COMMIT_MUTATION_CHANGE_LOWER_LIMIT;
-	private ArrayList<String> prefilteredCommitID ;
+	public static ArrayList<String> prefilteredCommitID ;
 	
 	public CommitFileLibrary(int delta){
+		commitImpact = new HashMap<String, Integer>();
 		commitFileLibrary = new HashMap<String, List<CommitFile>>();
 		prefilteredCommitID = new ArrayList<String>();
 		COMMIT_MUTATION_CHANGE_LOWER_LIMIT=delta;
 	}
 	
+	
+	public static void addImpact(String comitID, int impact){
+		commitImpact.put(comitID, impact);
+	}
 	
 	public ArrayList<String> getPrefilteredCommitList(){
 		if(prefilteredCommitID.isEmpty()){
@@ -99,7 +105,7 @@ public class CommitFileLibrary{
 	
 	
 	public void addCommitedFileToLibrary(String commitID, String path, String changeType){
-		//regiser new commit if not already in the library
+		//register new commit if not already in the library
 		if(!commitFileLibrary.containsKey(commitID)){
 			commitFileLibrary.put(commitID, new ArrayList<CommitFile>());
 		}
@@ -114,6 +120,7 @@ public class CommitFileLibrary{
 			index = fileListForCurrentCommit.indexOf(newCommitFile);
 		}else{
 			Main.printLine("[OPi+][ERROR] i have a file recorded as changed 2 in the same commit. This should not happen");		
+			System.out.println("break!");
 		}		
 	}
 	

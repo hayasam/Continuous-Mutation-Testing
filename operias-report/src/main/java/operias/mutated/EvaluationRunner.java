@@ -23,6 +23,7 @@ public class EvaluationRunner {
 	public static String scmTag;
 	public static String scmDevConnection;
 	public static String jUnitVersion;
+	public static String localPathForOPiReport;
 
 	public static void main(String[] args){
 		
@@ -37,7 +38,7 @@ public class EvaluationRunner {
 				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
 		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 2;
-		String localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
+		localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
 		
 		//JSoup
 		scmConnection="scm:git:https://github.com/jhy/jsoup.git";
@@ -67,25 +68,13 @@ public class EvaluationRunner {
 		//get commits to analyze
 		ArrayList<String>  commits = GitProxy.getFilteredCommits();
 		
-		/*
-		 * 
-		 //one time only compute the group and artifact part of the path - to use later for identifying the pitest path
-				 if(sw){
-						String[] tokens = .split("/");
-						GitProxy.groupArtifactID = tokens[3]+"."+tokens[4]+".*";
-						sw=false;
-					}
-		 * */
-		
 		//for each commit start the process
-		
 		int counter =1;
 		int total = commits.size();
 		for(String commitID: commits){
 			System.out.println("Analyzing  "+counter+" out of "+total+" ---> "+(counter*100/total)+"% DONE");
 			try {
 				Configuration.reset();
-				projectFile.setCommitID(commitID);
 				runOperiasMutated(REMOTE_URL, GitProxy.getPreviousCommitOf(commitID), commitID);
 			} catch (ExitRequiredException e) {
 				Main.printLine("[OPi+][ERROR]------------------------------------------------Operias crashed for commit: "+commitID);
@@ -119,6 +108,7 @@ public class EvaluationRunner {
 		EvaluationDataFile.write("System crashes: "+EvaluationCrashStatus.systemCrash);
 		float totalFailures = EvaluationCrashStatus.pitestCrash+EvaluationCrashStatus.operiasCrash+EvaluationCrashStatus.systemCrash;
 		EvaluationDataFile.write("Out of the"+ total +"commits, "+(totalFailures*100/total)+"% failed");
+		EvaluationDataFile.printLibrary();
 		
 		
 		//DELETE files & CLOSE reports
@@ -131,6 +121,7 @@ public class EvaluationRunner {
 		
 		} catch (IOException e) {
 			e.printStackTrace();
+			//if setup of initial files crashes it does not affect the evaluation process
 		}
 	}
 

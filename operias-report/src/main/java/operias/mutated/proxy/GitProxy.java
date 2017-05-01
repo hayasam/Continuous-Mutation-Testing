@@ -16,6 +16,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
@@ -233,11 +234,12 @@ public class GitProxy {
 				for (DiffEntry diff : diffs) {
 					// a diff represents a file that was changed within the current commit
 					String filePath;
-					if(diff.getChangeType().equals("DELETE"))
-						filePath = diff.getOldPath();
-					else
+					ChangeType type  = diff.getChangeType();
+					if( type.compareTo(ChangeType.DELETE) != 0){
 						filePath = diff.getNewPath();
-					commitFileLibrary.addCommitedFileToLibrary(commit.getName(), filePath, diff.getChangeType().toString());
+						commitFileLibrary.addCommitedFileToLibrary(commit.getName(), filePath, diff.getChangeType().toString());
+					}
+					
 				}
 		} catch (Throwable t) {
 			Main.printLine("[OPi+][ERROR] preprocesing commit: failed to determine files in commit!");

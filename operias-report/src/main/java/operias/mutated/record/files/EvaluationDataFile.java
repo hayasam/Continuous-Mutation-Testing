@@ -5,12 +5,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.swing.plaf.synth.SynthEditorPaneUI;
+
+import org.eclipse.jgit.transport.GitProtocolConstants;
+import org.omg.PortableServer.SERVANT_RETENTION_POLICY_ID;
 
 import operias.Main;
+import operias.mutated.CommitFile;
+import operias.mutated.CommitFileLibrary;
+import operias.mutated.MutatedFile;
 
 public class EvaluationDataFile {
 
-
+		private static final String SEPARATOR = "|@|";
 		private static BufferedWriter bw;
 		private static String evaluationDATAFileName;
 		private static FileOutputStream fos;
@@ -50,8 +61,24 @@ public class EvaluationDataFile {
 			}
 			
 		}
+
+		public static void printLibrary() {
+			write("Commit ID"+SEPARATOR+
+				  "#Changed Files"+SEPARATOR+
+				  "OPi+ Impact"+SEPARATOR+
+				  "Passed Prefiltering");
+			
+			Map<String, List<CommitFile>> commitFileLibrary = CommitFileLibrary.commitFileLibrary;
+			Map<String, Integer> commitImpact = CommitFileLibrary.commitImpact;
+			for(String commitID : commitFileLibrary.keySet()){
+				write(commitID+SEPARATOR+
+						commitFileLibrary.get(commitID).size()+SEPARATOR+
+						commitImpact.get(commitID)+SEPARATOR+
+						CommitFileLibrary.prefilteredCommitID.contains(commitID));
+			}
+		}
+
 		
 		
 		
-	
 }

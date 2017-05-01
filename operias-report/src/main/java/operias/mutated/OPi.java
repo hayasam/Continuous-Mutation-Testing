@@ -1,14 +1,22 @@
 package operias.mutated;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+
+import difflib.Chunk;
+import difflib.Delta;
 import operias.Configuration;
 import operias.Main;
+import operias.mutated.exceptions.FileException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.proxy.PitestProxy;
+import operias.mutated.record.files.EvaluationCrashStatus;
 import operias.mutated.record.files.EvaluationFileWriter;
 import operias.report.OperiasFile;
 import operias.report.OperiasReport;
@@ -19,7 +27,9 @@ import operias.report.change.OperiasChange;
 
 public class OPi {
 	
+	
 	private ArrayList<MutatedFile> mutatedFiles;
+	public static ArrayList<Line> updatedLines;
 	OperiasReport operiasReport;
 
 	public OPi(OperiasReport operiasReport) throws PiTestException, SystemException {
@@ -28,34 +38,92 @@ public class OPi {
 		this.mutatedFiles = new ArrayList<MutatedFile>();
 		
 		List<OperiasFile> filesChanged = operiasReport.getChangedClasses();
-		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size());  
+		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size()); 
+		Main.printLine("[OPi+] Pipeline: Collecting all changed lines for each file");
 		for(OperiasFile currentFileChanged : filesChanged){
-			ArrayList<Integer> diffCoveredLines = parseOperiasFile(currentFileChanged);
+			//create mutated file
+			//TODO  test??
+			ArrayList<Line> changedLines = getLinesFromOperiasFile(currentFileChanged);
 			String currentFileName = currentFileChanged.getSourceDiff().getFileName(operiasReport);
-			if(diffCoveredLines.size()>0){
-				mutatedFiles.add(new MutatedFile(currentFileName, diffCoveredLines, Configuration.getRevisedCommitID()));
-				Main.printLine("[OPi+] Pipeline: I have changed and covered by tests lines in file "+currentFileName); 
+			if(changedLines.size()>0){
+				mutatedFiles.add(new MutatedFile(currentFileName, changedLines, Configuration.getRevisedCommitID()));
 			}
 		}
 		
-		
-		Main.printLine("[OPi+] Pipeline: Number of files mutated: "+mutatedFiles.size()); 
-		if(mutatedFiles.size()>0){			
-			
-			Main.printLine("[OPi+][INFO] Start processing the commited changes");
-			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID());
+		Main.printLine("[OPi+] Pipeline: Number of files with changes in this commit: "+mutatedFiles.size()); 
+		if(mutatedFiles.size()>0){	
+			Main.printLine("[OPi+][INFO] Start processing the changes commited in "+Configuration.getRevisedCommitID());
+			//run pitest on last commit to get all report for files changed in this commmit
+			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID(), false);
 			processMutatedCommit(pitestReportsPath);
 			
+			
+			runPreviousMutationAnalysis();
+			//print to file all line for this file
+			//TODO test
+			EvaluationFileWriter.print(mutatedFiles);
+			
+			
+			computeCommitImpactToLibrary();			
 		}else{
-			//this scenario is not usefull for the Evaluation step => it should just output the old Operias report
-			Main.printLine("[OPi+][BLUE-1] There are NO changed code lines that are also covered by the test suite");
-			EvaluationFileWriter.blue1();
+			//this scenario means the prefiltering is not good enough
+			Main.printLine("[OPi+][ERROR] There are NO changed code lines");
+			throw new SystemException(Configuration.getRevisedCommitID(), "this commit should have been prefiltered. There are no lines changed or added in this commit", new Exception());
 		}
 		
 	}
 
 	
+	
 
+	private void computeCommitImpactToLibrary() {
+		int currentCommitImpact = 0;
+		for(MutatedFile mf : mutatedFiles){
+			currentCommitImpact += mf.getFileCommitImpact();
+		}
+		CommitFileLibrary.addImpact(Configuration.getRevisedCommitID(), currentCommitImpact);
+		
+	}
+
+
+
+
+	private void runPreviousMutationAnalysis() throws PiTestException, SystemException {
+		//run previous Pitest analysis
+		if(updatedLines.size()>0){
+			//run pitest on previous commit and record data in different file?
+			String previousCommit = Configuration.getOriginalCommitID();
+			Main.printLine("[OPi+][INFO] running Pitest for previous commit"+previousCommit+" because current commit "+Configuration.getRevisedCommitID()+" has at least one updated line");
+			
+			//TODO test
+			String mutationReportPath = PitestProxy.getMutationReportFor(previousCommit, true);
+			
+	        File srcDir = new File(mutationReportPath);
+	        String destination = EvaluationRunner.localPathForOPiReport+"/previousCommitReports";
+	        File destDir = new File(destination);
+	        try {
+	            FileUtils.copyDirectory(srcDir, destDir);
+	          //add previous commitID as field for all lines
+	            for(Line line:updatedLines){
+	            	line.setPreviousCommitID(previousCommit);
+	            	line.setPreviousCommitMutationReportPath(destination);
+	            }
+	            
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            throw new SystemException(Configuration.getRevisedCommitID(), "could not copy mutation reports for previous commit", e);
+	        }
+		}
+	}
+
+
+
+
+	public static void rememberUpdatedLine(Line line){
+		updatedLines.add(line);
+	}
+	
+	//go through all files changed in current commit
 	private void processMutatedCommit(String pitestReportsPath) throws SystemException {
 		
 		for(MutatedFile currentMutatedFile : mutatedFiles){
@@ -67,13 +135,92 @@ public class OPi {
 			// /tmp/TestGitRepository6589134661357336768/target/pit-reports/201704041512/groupID.artifactID/BankAccount.java.html
 			
 			String currentPitestReport = pitestReportsPath;
-			currentMutatedFile.setMutationReportPath(currentPitestReport);	
-			Main.printLine("path for current file: "+currentPitestReport);
+			try {
+				currentMutatedFile.setMutationReportPath(currentPitestReport);
+				currentMutatedFile.extractMutationReport();
+				Main.printLine("path for current file: "+currentPitestReport);
+			} catch (FileException e) {
+				EvaluationCrashStatus.recordFileMutationPathCrash(e.getInfo());
+				Main.printLine("Ignored current file dues to no mutation path");
+			}	
+			
 		}
 	}
 
 	
-	
+	private ArrayList<Line> getLinesFromOperiasFile(OperiasFile currentFileChanged) {
+		ArrayList<Line> changedLines = new ArrayList<Line>();
+		
+		LinkedList<OperiasChange> changedBlocksinFile =  currentFileChanged.getChanges();
+		int noChangeBlocksInFile =  changedBlocksinFile.size();
+		
+		//for each block
+		for(OperiasChange currentChange : changedBlocksinFile){
+			changedLines.addAll(processBlockChange(currentChange,currentFileChanged)) ;
+		}
+		return changedLines;
+	}
+
+	private ArrayList<Line> processBlockChange(OperiasChange currentChange, OperiasFile currentFileChanged) {
+		ArrayList<Line> changedLinesInBlock = new ArrayList<Line>();
+		
+		if(currentChange instanceof ChangeSourceChange){
+			changedLinesInBlock=processBlock(currentChange, currentFileChanged,"ADD");
+		}else if(currentChange instanceof InsertSourceChange){
+			changedLinesInBlock=processBlock(currentChange, currentFileChanged,"UPDATE");
+		}else if(currentChange instanceof DeleteSourceChange){
+			Main.printLine("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition());
+		}else{
+			//Increased and Decreased Coverage - considered changes by Operias not relevant for OPi+
+		}
+		return changedLinesInBlock;
+		
+	}
+
+
+	private ArrayList<Line> processBlock(OperiasChange currentChange, OperiasFile currentFileChanged,  String changeType) {
+		ArrayList<Line> changedLinesInBlock = new ArrayList<Line>();
+		boolean coverageFlag=false;
+		//int firstLineAdded = currentChange.getSourceDiffDelta().getRevised().getPosition()+1;
+		//int lastLineAdded = firstLineAdded +currentChange.getSourceDiffDelta().getRevised().getLines().size()-1;
+				
+				
+		//obs: might be different for update and change; maybe use size of revisedCoverage
+		
+		List<Boolean> blockCoverage = currentChange.getRevisedCoverage();
+		Main.printLine("in the current block there are "+currentChange.getRevisedCoverage().size()+" lines affected");
+		
+		Delta delta = currentChange.getSourceDiffDelta();
+		Chunk newChunk = delta.getRevised();
+		Chunk oldChunk = delta.getOriginal();
+		
+		for(int i = 0; i<=newChunk.getLines().size(); i++){
+			
+			if(blockCoverage.get(i)!=null && blockCoverage.get(i)){
+				coverageFlag=true;
+			}
+			
+			String newLine = newChunk.getLines().get(i).toString();
+			String oldLine= oldChunk.getLines().get(i).toString();
+			
+			
+			
+			Line currentLine = new Line(currentChange.getRevisedLineNumber(), changeType, coverageFlag, newLine, oldLine);
+			changedLinesInBlock.add(currentLine);
+			coverageFlag=false;	
+
+			Main.printLine(changedLinesInBlock.toString());
+		}
+		Main.printLine("[OPi+] We have "+ changedLinesInBlock.size()+" lines to mutate");
+		
+		return changedLinesInBlock;
+	}
+
+
+
+
+
+/*
 
 	private ArrayList<Integer> parseOperiasFile(OperiasFile operiasFile) {
 		LinkedList<OperiasChange> changedBlocksinFile =  operiasFile.getChanges();
@@ -121,7 +268,7 @@ public class OPi {
 		return diffCoveredLines;
 	}
 	
-	
+	*/
 	
 	
 	/*

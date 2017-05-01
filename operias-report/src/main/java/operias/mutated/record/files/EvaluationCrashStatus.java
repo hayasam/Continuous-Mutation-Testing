@@ -14,6 +14,7 @@ public class EvaluationCrashStatus {
 	public static int pitestCrash;
 	public static int operiasCrash;
 	public static int systemCrash;
+	public static int fileMutationPathCrash;
 	private static String SEPARATOR = "|@| ";
 	
 	private static BufferedWriter bw;
@@ -25,6 +26,7 @@ public class EvaluationCrashStatus {
 		pitestCrash=0;
 		operiasCrash=0;
 		systemCrash=0;
+		fileMutationPathCrash=0;
 		
 		String fileName = projectName+"CRASH";
 		evaluationDATAFileName = path+"/"+fileName+".csv";
@@ -46,7 +48,11 @@ public class EvaluationCrashStatus {
 	
 	public static void recordPitestCrash(String[] strings){
 		pitestCrash++;
-		write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
+		if(strings.length>2){
+			write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]+" "+SEPARATOR+" "+strings[2]);
+		}else{
+			write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
+		}
 	}
 	
 	public static void recordOperiasCrash(String commitID, String cause){
@@ -57,6 +63,11 @@ public class EvaluationCrashStatus {
 	public static void recordSystemCrash(String[] info){
 		systemCrash++;
 		write("System Crash "+SEPARATOR+" "+info[0]+" "+SEPARATOR+" "+info[1]+" "+SEPARATOR+" "+info[2]);
+	}
+	
+	public static void recordFileMutationPathCrash(String[] info){
+		fileMutationPathCrash++;
+		write("Mutation File Path Crash "+SEPARATOR+" "+info[0]+" "+SEPARATOR+" "+info[1]);
 	}
 	
 	

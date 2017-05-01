@@ -7,6 +7,7 @@ public class PiTestException extends Exception{
 
 		private String commit; 
 		private String reason;
+		private String flag;
 	
 	
 	  public PiTestException(String commit, String reason) {
@@ -14,14 +15,21 @@ public class PiTestException extends Exception{
 		  this.commit=commit;
 	      this.reason = reason;
 	    }
+	  
+	  public PiTestException(String commit, String reason, String previousFlag) {
+		  super(commit+reason+previousFlag);
+		  this.commit=commit;
+	      this.reason = reason;
+	      this.flag = previousFlag;
+	    }
 
 	  @Override
 	  public void printStackTrace(){
-		  Main.printLine("Error for commit "+commit+" because "+reason);
+		  Main.printLine("Error for commit "+commit+" because "+reason+" "+flag);
 	  }
 		
 	  public String[] getInfo(){
-		  String[] info = {commit, reason};
+		  String[] info = {commit, reason, flag};
 		  return info;
 	  }
 	  
