@@ -14,6 +14,7 @@ import operias.mutated.proxy.ThirdPartyProxySeetings;
 import operias.mutated.record.files.EvaluationCrashStatus;
 import operias.mutated.record.files.EvaluationDataFile;
 import operias.mutated.record.files.EvaluationFileWriter;
+import operias.mutated.record.files.EvaluationNoReportFileWriter;
 import operias.mutated.record.files.EvaluationOPiLogFile;
 
 public class EvaluationRunner {
@@ -24,20 +25,26 @@ public class EvaluationRunner {
 	public static String scmDevConnection;
 	public static String jUnitVersion;
 	public static String localPathForOPiReport;
+	
+	public static int commentLinesSkiped;
 
+	public static int noMutationReport;
+	public static int withMutationReport;
+	
 	public static void main(String[] args){
 		
 		//RUN EVALUATION
 		
 		//set up the project
-		String REMOTE_URL = "https://github.com/ileontiuc/jsoup";
+		String REMOTE_URL = "https://github.com/jhy/jsoup";
+				//"https://github.com/ileontiuc/jsoup";
 				//"https://github.com/jhy/jsoup";
 				//"https://github.com/ileontiuc/commons-text";
 				//"https://github.com/ileontiuc/testSettings"; 
 				
 				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
-		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 2;
+		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 1;
 		localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
 		
 		//JSoup
@@ -57,6 +64,7 @@ public class EvaluationRunner {
 			EvaluationFileWriter projectFile = new EvaluationFileWriter(projectName, localPathForOPiReport);
 			EvaluationDataFile dataFile = new EvaluationDataFile(projectName, localPathForOPiReport);
 			EvaluationCrashStatus crashFile = new EvaluationCrashStatus(projectName, localPathForOPiReport);
+			EvaluationNoReportFileWriter noReportCommits = new EvaluationNoReportFileWriter(projectName, localPathForOPiReport);
 			
 			EvaluationDataFile.write("Project repository link: "+REMOTE_URL);
 			
@@ -71,11 +79,18 @@ public class EvaluationRunner {
 		//for each commit start the process
 		int counter =1;
 		int total = commits.size();
+		EvaluationDataFile.write("");
+		EvaluationDataFile.write("commits that are analyzed (filtered in - crashes)");
+		EvaluationDataFile.write("Commit ID |@| #Mutation report files missing |@| File with mutation report");
 		for(String commitID: commits){
 			System.out.println("Analyzing  "+counter+" out of "+total+" ---> "+(counter*100/total)+"% DONE");
+			noMutationReport = 0;
+			withMutationReport = 0;
+			commentLinesSkiped=0;
 			try {
 				Configuration.reset();
 				runOperiasMutated(REMOTE_URL, GitProxy.getPreviousCommitOf(commitID), commitID);
+				EvaluationDataFile.write(commitID, noMutationReport, withMutationReport);
 			} catch (ExitRequiredException e) {
 				Main.printLine("[OPi+][ERROR]------------------------------------------------Operias crashed for commit: "+commitID);
 				EvaluationCrashStatus.recordOperiasCrash(commitID, e.getCause().toString());
@@ -108,6 +123,11 @@ public class EvaluationRunner {
 		EvaluationDataFile.write("System crashes: "+EvaluationCrashStatus.systemCrash);
 		float totalFailures = EvaluationCrashStatus.pitestCrash+EvaluationCrashStatus.operiasCrash+EvaluationCrashStatus.systemCrash;
 		EvaluationDataFile.write("Out of the"+ total +"commits, "+(totalFailures*100/total)+"% failed");
+		EvaluationDataFile.write("Skipped "+commentLinesSkiped+" lines that where changed and also a comment");
+		
+		
+		EvaluationDataFile.write("");
+		EvaluationDataFile.write("These are ALL commits from repository");
 		EvaluationDataFile.printLibrary();
 		
 		
@@ -116,8 +136,11 @@ public class EvaluationRunner {
 		EvaluationFileWriter.close();
 		EvaluationDataFile.close();
 		EvaluationCrashStatus.close();
-		EvaluationOPiLogFile.close();
+		EvaluationNoReportFileWriter.close();
+		
 		System.out.println("[OPi+][Info] done parsing all usefull commits from project "+ REMOTE_URL);
+		EvaluationOPiLogFile.write("[OPi+][Info] done parsing all usefull commits from project "+ REMOTE_URL);
+		EvaluationOPiLogFile.close();
 		
 		} catch (IOException e) {
 			e.printStackTrace();

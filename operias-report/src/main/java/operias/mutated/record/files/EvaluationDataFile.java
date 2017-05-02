@@ -62,6 +62,11 @@ public class EvaluationDataFile {
 			
 		}
 
+		
+		public static void write(String ID, int no, int with){
+			write(ID+SEPARATOR+no+SEPARATOR+with);
+		}
+		
 		public static void printLibrary() {
 			write("Commit ID"+SEPARATOR+
 				  "#Changed Files"+SEPARATOR+

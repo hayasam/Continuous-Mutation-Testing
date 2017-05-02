@@ -47,23 +47,33 @@ public class MutatedFile {
 		return diffLines.size();
 	}
 	
-	public void setMutationReportPath(String path) throws SystemException, FileException{
+	
+	
+	public String setMutationReportPath(String path) throws SystemException, FileException{
 		String[] tokens = systemFileName.split("/");
 		
-		//TODO jsoup hack
-		String mutationReportPath = null;
+		//TODO jsoup hack path goes only 1 subfolder level down
+		String computedPath = null;
 		if(tokens.length==8){
-			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
+			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
 			fileName=tokens[7];
 		}else if(tokens.length==7){
-			mutationReportPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
+			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
 			fileName=tokens[6];
 		}else{
 			throw new FileException(commitID, "Can`t parse path to mutation report");
 		}
 		
-		this.mutationReportPath = mutationReportPath;
-		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+tokens[6]+"  "+mutationReportPath);
+		
+		File f = new File(computedPath);
+		if(f.exists() && !f.isDirectory()){
+			this.mutationReportPath = computedPath;
+		}else{
+			this.mutationReportPath=null;
+		}
+		
+		Main.printLine("[OPi+][INFO] computing path to the pitest report for "+mutationReportPath);
+		return this.mutationReportPath;
 	}
 	
 	
@@ -100,6 +110,7 @@ public class MutatedFile {
 			Elements noAvailableOperator = doc.getElementsByAttributeValue("class", "na");
 			
 			
+			
 			//process all coveredContent
 			int counter =0;
 			while(counter<coveredContent.size()){
@@ -121,12 +132,8 @@ public class MutatedFile {
 				int codeLineNumber = Integer.parseInt(noTestCoverageContent.get(counter).ownText());
 				Line line = lineArrayContains(diffLines, codeLineNumber);
 				if(line != null){
-					//TODO test
-					
-					//>0 no coverage mutants => blue 1
 					line.setBlueOutput("1");
-					//otherwise blue 2/3
-					
+					line.incrementNoCoverage();
 					counter++;
 				}else{
 					counter++;
@@ -141,13 +148,11 @@ public class MutatedFile {
 				int codeLineNumber = Integer.parseInt(noAvailableOperator.get(counter).ownText());
 				Line line = lineArrayContains(diffLines, codeLineNumber);
 				if(line != null){
-					//TODO test
 					line.setBlueOutput("2/3");					
 					counter++;
 				}else{
 					counter++;
 				}
-				counter++;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -169,7 +174,6 @@ public class MutatedFile {
 			counter++;
 		}else{
 			counter++;
-			//TODO expand this to blue 2 and blue 3
 			line.setBlueOutput("2/3");
 			Main.printLine("[OPi+][BLUE-2/3] there are no mutants for "+line.getNumber()+"   "+coveredContent.get(counter).ownText());
 		}
@@ -204,11 +208,8 @@ public class MutatedFile {
 				line.incrementSuvived();
 			}else if (description.contains("KILLED")){
 				line.incrementKilled();
-			//TODO test this
-			}else if(description.contains("NO COVERAGE")){
+			}else if(description.contains("NO_COVERAGE")){
 				line.incrementNoCoverage();
-			}else{
-				throw new SystemException(Configuration.getRevisedCommitID(), "this shouldnot happend. these mutants are covered??", new Exception("mutant should be covered here"));
 			}
 		}
 		if(mutations.isEmpty()){
@@ -313,7 +314,7 @@ public class MutatedFile {
 					
 				}else{
 					counter++;
-					//TODO expand this to blue 2 and blue 3
+					// expand this to blue 2 and blue 3
 					EvaluationFileWriter.setNewCodeLine(content.get(counter).ownText());
 					EvaluationFileWriter.setBlueOutput("2/3");
 					EvaluationFileWriter.writeInFile("");

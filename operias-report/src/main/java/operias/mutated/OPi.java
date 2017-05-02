@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
+import com.jcraft.jsch.ConfigRepository.Config;
+
 import difflib.Chunk;
 import difflib.Delta;
 import operias.Configuration;
@@ -17,6 +19,7 @@ import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.proxy.PitestProxy;
 import operias.mutated.record.files.EvaluationCrashStatus;
+import operias.mutated.record.files.EvaluationDataFile;
 import operias.mutated.record.files.EvaluationFileWriter;
 import operias.report.OperiasFile;
 import operias.report.OperiasReport;
@@ -36,13 +39,14 @@ public class OPi {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
-		
+		this.updatedLines = new ArrayList<Line>();
 		List<OperiasFile> filesChanged = operiasReport.getChangedClasses();
 		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size()); 
 		Main.printLine("[OPi+] Pipeline: Collecting all changed lines for each file");
+		//TODO write in thesis the list of files changed by Operias is larger than reality.i.e jsoup commit 3519d82fb3b11bc3a96b3598bfa9ccde9fae4fc9 has 38 file changes, and operias reports it as 99
+		//operias looks ar class level, maybe it duplicates outside comment?? 
 		for(OperiasFile currentFileChanged : filesChanged){
 			//create mutated file
-			//TODO  test??
 			ArrayList<Line> changedLines = getLinesFromOperiasFile(currentFileChanged);
 			String currentFileName = currentFileChanged.getSourceDiff().getFileName(operiasReport);
 			if(changedLines.size()>0){
@@ -57,14 +61,15 @@ public class OPi {
 			String pitestReportsPath = PitestProxy.getMutationReportFor(Configuration.getRevisedCommitID(), false);
 			processMutatedCommit(pitestReportsPath);
 			
-			
-			runPreviousMutationAnalysis();
 			//print to file all line for this file
-			//TODO test
+			//boolean runPrevious=updatedLines.size()>0;
+			//String previousCommit = Configuration.getOriginalCommitID();
 			EvaluationFileWriter.print(mutatedFiles);
+			computeCommitImpactToLibrary();
 			
-			
-			computeCommitImpactToLibrary();			
+			//if(runPrevious){
+			//	runPreviousMutationAnalysis(previousCommit);
+			//}
 		}else{
 			//this scenario means the prefiltering is not good enough
 			Main.printLine("[OPi+][ERROR] There are NO changed code lines");
@@ -88,34 +93,7 @@ public class OPi {
 
 
 
-	private void runPreviousMutationAnalysis() throws PiTestException, SystemException {
-		//run previous Pitest analysis
-		if(updatedLines.size()>0){
-			//run pitest on previous commit and record data in different file?
-			String previousCommit = Configuration.getOriginalCommitID();
-			Main.printLine("[OPi+][INFO] running Pitest for previous commit"+previousCommit+" because current commit "+Configuration.getRevisedCommitID()+" has at least one updated line");
-			
-			//TODO test
-			String mutationReportPath = PitestProxy.getMutationReportFor(previousCommit, true);
-			
-	        File srcDir = new File(mutationReportPath);
-	        String destination = EvaluationRunner.localPathForOPiReport+"/previousCommitReports";
-	        File destDir = new File(destination);
-	        try {
-	            FileUtils.copyDirectory(srcDir, destDir);
-	          //add previous commitID as field for all lines
-	            for(Line line:updatedLines){
-	            	line.setPreviousCommitID(previousCommit);
-	            	line.setPreviousCommitMutationReportPath(destination);
-	            }
-	            
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	            throw new SystemException(Configuration.getRevisedCommitID(), "could not copy mutation reports for previous commit", e);
-	        }
-		}
-	}
-
+	
 
 
 
@@ -134,11 +112,16 @@ public class OPi {
 			
 			// /tmp/TestGitRepository6589134661357336768/target/pit-reports/201704041512/groupID.artifactID/BankAccount.java.html
 			
-			String currentPitestReport = pitestReportsPath;
 			try {
-				currentMutatedFile.setMutationReportPath(currentPitestReport);
-				currentMutatedFile.extractMutationReport();
-				Main.printLine("path for current file: "+currentPitestReport);
+				if(currentMutatedFile.setMutationReportPath(pitestReportsPath) != null){
+					currentMutatedFile.extractMutationReport();
+					Main.printLine("path for mutation report for current file: "+currentMutatedFile.getFileName()+" is at "+currentMutatedFile.getMutationReportPath());
+					EvaluationRunner.withMutationReport++;
+				}else{
+					Main.printLine("Pitest did not create mutation report for current file: "+currentMutatedFile.getFileName());
+					EvaluationRunner.noMutationReport++;
+				}
+				
 			} catch (FileException e) {
 				EvaluationCrashStatus.recordFileMutationPathCrash(e.getInfo());
 				Main.printLine("Ignored current file dues to no mutation path");
@@ -165,9 +148,9 @@ public class OPi {
 		ArrayList<Line> changedLinesInBlock = new ArrayList<Line>();
 		
 		if(currentChange instanceof ChangeSourceChange){
-			changedLinesInBlock=processBlock(currentChange, currentFileChanged,"ADD");
-		}else if(currentChange instanceof InsertSourceChange){
 			changedLinesInBlock=processBlock(currentChange, currentFileChanged,"UPDATE");
+		}else if(currentChange instanceof InsertSourceChange){
+			changedLinesInBlock=processBlock(currentChange, currentFileChanged,"ADD");
 		}else if(currentChange instanceof DeleteSourceChange){
 			Main.printLine("[OPi+] code was deleted starting at line: "+currentChange.getSourceDiffDelta().getOriginal().getPosition());
 		}else{
@@ -191,32 +174,69 @@ public class OPi {
 		Main.printLine("in the current block there are "+currentChange.getRevisedCoverage().size()+" lines affected");
 		
 		Delta delta = currentChange.getSourceDiffDelta();
+		
 		Chunk newChunk = delta.getRevised();
 		Chunk oldChunk = delta.getOriginal();
 		
-		for(int i = 0; i<=newChunk.getLines().size(); i++){
+		
+		for(int i = 0; i<newChunk.getLines().size(); i++){
 			
 			if(blockCoverage.get(i)!=null && blockCoverage.get(i)){
 				coverageFlag=true;
 			}
 			
+			//TODO get old line??
 			String newLine = newChunk.getLines().get(i).toString();
-			String oldLine= oldChunk.getLines().get(i).toString();
+			String oldLine="";
+			//if(changeType.equals("UPDATE")){
+			//	oldLine= oldChunk.getLines().get(i).toString();
+			//} //maybe just print it when available ???
 			
-			
-			
-			Line currentLine = new Line(currentChange.getRevisedLineNumber(), changeType, coverageFlag, newLine, oldLine);
-			changedLinesInBlock.add(currentLine);
+			String codeLine = newLine.replaceAll("\\s+","");
+			if(codeLine.startsWith("//")||codeLine.startsWith("*")||codeLine.startsWith("/*")||codeLine.endsWith("*/")||
+					codeLine.startsWith("@Override")||codeLine.startsWith("import")||codeLine.startsWith("package")){
+				EvaluationRunner.commentLinesSkiped++;
+			}else{
+				Line currentLine = new Line(currentChange.getRevisedLineNumber()+i, changeType, coverageFlag, newLine, oldLine);
+				changedLinesInBlock.add(currentLine);
+			}
 			coverageFlag=false;	
 
-			Main.printLine(changedLinesInBlock.toString());
+			
 		}
 		Main.printLine("[OPi+] We have "+ changedLinesInBlock.size()+" lines to mutate");
+		//print the line number that should be analyzed
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		for(Line l : changedLinesInBlock){
+			list.add(l.getNumber());
+		}
+		Main.printLine(list.toString());
 		
 		return changedLinesInBlock;
 	}
 
 
+
+	private void runPreviousMutationAnalysis(String previousCommit) throws PiTestException, SystemException {
+		//run previous Pitest analysis
+		
+			//run pitest on previous commit and record data in different file?
+			Main.printLine("[OPi+][INFO] running Pitest for previous commit"+previousCommit+" because current commit "+Configuration.getRevisedCommitID()+" has at least one updated line");
+			
+			String mutationReportPath = PitestProxy.getMutationReportFor(previousCommit, true);
+			
+	        File srcDir = new File(mutationReportPath);
+	        String destination = EvaluationRunner.localPathForOPiReport+"/previousCommitReports/"+previousCommit;
+	        File destDir = new File(destination);
+	        try {
+	            FileUtils.copyDirectory(srcDir, destDir);
+	            EvaluationDataFile.write("for commit "+Configuration.getRevisedCommitID()+"  the previous commit "+previousCommit+" mutation reports are at: "+destDir);
+	            
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	            throw new SystemException(Configuration.getRevisedCommitID(), "could not copy mutation reports for previous commit", e);
+	        }
+	}
 
 
 

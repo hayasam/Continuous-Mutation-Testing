@@ -12,6 +12,7 @@ public class EvaluationCrashStatus {
 
 	
 	public static int pitestCrash;
+	//public static int previousPitestCrash;
 	public static int operiasCrash;
 	public static int systemCrash;
 	public static int fileMutationPathCrash;
@@ -24,6 +25,7 @@ public class EvaluationCrashStatus {
 	public EvaluationCrashStatus(String projectName, String path) throws IOException{
 		
 		pitestCrash=0;
+	//	previousPitestCrash=0;
 		operiasCrash=0;
 		systemCrash=0;
 		fileMutationPathCrash=0;
@@ -47,12 +49,9 @@ public class EvaluationCrashStatus {
 	
 	
 	public static void recordPitestCrash(String[] strings){
+		
 		pitestCrash++;
-		if(strings.length>2){
-			write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]+" "+SEPARATOR+" "+strings[2]);
-		}else{
-			write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
-		}
+		write("Pitest Crash"+SEPARATOR+strings[0]+" "+SEPARATOR+" "+strings[1]);
 	}
 	
 	public static void recordOperiasCrash(String commitID, String cause){

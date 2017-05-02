@@ -26,8 +26,9 @@ public class TestRunner {
 
 	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, TransformerException {
 		
-		
-		
+		String s = null;
+		System.out.println(s==null);
+		/*
 		
 		//set up the project
 				String REMOTE_URL = "https://github.com/ileontiuc/testSettings.git";
@@ -106,6 +107,7 @@ public class TestRunner {
 				StreamResult result = new StreamResult(new File(pomFile));
 				transformer.transform(source, result);
 				
+				*/
 	}
 
 }

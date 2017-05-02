@@ -34,15 +34,15 @@ import operias.mutated.exceptions.SystemException;
 public class PitestProxy {
 	
 	public static ThirdPartyProxySeetings settings;
+	private static boolean previousCommit;
 	
-	
-	public static String getMutationReportFor(String commitID, boolean previousCommit) throws PiTestException, SystemException {
+	public static String getMutationReportFor(String commitID, boolean previousFlag) throws PiTestException, SystemException {
 		/* due to Pitest run on last commit feature limitation we have to update the head 
 		 * each time to run the evaluation = running pitest on specific commit not just the last one
 		*/
 		GitProxy.changeHeadTo(commitID);
 		String mutationPath = null;
-		
+		previousCommit=previousFlag;
 		//change running local path due to Pitest Bug: hcoles/pitest: Issue #336
         Invoker invoker = new DefaultInvoker();	 
         invoker.setMavenHome(new File(settings.MAVEN_PATH));
@@ -54,33 +54,27 @@ public class PitestProxy {
         try {
 			updatePomFileForMutationProcess(pomFile);
 		} catch (ParserConfigurationException|SAXException|IOException|TransformerException e1) {
-			if(previousCommit){
-				throw new PiTestException(commitID,"could not parse and edit pom file ","PREVIOUS");
-			}else{
-				throw new PiTestException(commitID,"could not parse and edit pom file ");
-			}
-			
+				e1.printStackTrace();
+				throw new PiTestException(commitID,"could not parse and edit pom file ",previousCommit);
 		} catch (Exception e){
-			e.printStackTrace();
-			if(previousCommit){
-				throw new PiTestException(commitID,"fault in my logic when parsing the pom file ", "PREVIOUS");
-			}else{
-				throw new PiTestException(commitID,"fault in my logic when parsing the pom file ");
-			}
-			
+				e.printStackTrace();
+				throw new PiTestException(commitID,"fault in my logic when parsing the pom file ", previousCommit);
 			
 		}
         
 		//setup Pitest on last commit
 		InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(pomFile);
+        
         request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -Dmutators=ALL -l logfile.txt" ) );
         //-DtargetTests="+GitProxy.getGroupArtifactPath()+" - used to fix the pitest bug but apparently it works for JSoup
         //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
         
+        //TODO obs need this -DtargetTests=groupID.artifactID.*   for testSettings to run properly = mutants that are killed/survived not only no coverage
         //-l logfile.txt
         //mvn console output is stored in logfile.txt
 		
+        
         
         //run Pitest on last commit
         InvocationResult result;
@@ -107,7 +101,7 @@ public class PitestProxy {
 		} catch (MavenInvocationException|IllegalStateException e) {
 			Main.printLine("[OPi+][ERROR] could not run Pitest on last commit");
 			e.printStackTrace();
-			throw new PiTestException(commitID, "Pitest Build Failed on current commit");
+			throw new PiTestException(commitID, "Pitest Build Failed on current commit", previousFlag);
 			
 		}
 		return mutationPath;
@@ -120,10 +114,10 @@ public class PitestProxy {
 		try{
 			
 			if(FileUtils.readFileToString(logFilePath).contains("[INFO] No modified files found - nothing to mutation test")){
-				throw new PiTestException(commitID, "Pitest did not detect any change");
+				throw new PiTestException(commitID, "Pitest did not detect any change", previousCommit);
 			}
 			if(FileUtils.readFileToString(logFilePath).contains("No mutations found.")){
-				throw new PiTestException(commitID, "Pitest did not generate any mutations");
+				throw new PiTestException(commitID, "Pitest did not generate any mutations", previousCommit);
 			}
 			return true;
 		} catch(IOException e){
@@ -153,6 +147,7 @@ public class PitestProxy {
 	            NodeList list = eElement.getElementsByTagName("artifactId");
 	            if(list.getLength()>0 && list.item(0).getTextContent().equals("junit")){
 	            	 eElement.getElementsByTagName("version").item(0).setTextContent(EvaluationRunner.jUnitVersion);
+	            	 Main.printLine("updated Junit dependency");
 	            }
 	         }
 	      }
@@ -170,21 +165,25 @@ public class PitestProxy {
 		            	 Element newTag = document.createElement("developerConnection");
 		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmDevConnection));
 		            	 eElement.appendChild(newTag);
+		            	 Main.printLine("Added scm connection element");
 		            }
 		            if(eElement.getElementsByTagName("url").getLength()==0){
 		            	 Element newTag = document.createElement("url");
 		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmURL));
 		            	 eElement.appendChild(newTag);
+		            	 Main.printLine("Added scm connection element");
 		            }
 		            if(eElement.getElementsByTagName("connection").getLength()==0){
 		            	 Element newTag = document.createElement("connection");
 		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmConnection));
 		            	 eElement.appendChild(newTag);
+		            	 Main.printLine("Added scm connection element");
 		            }
 		            if(eElement.getElementsByTagName("tag").getLength()==0){
 		            	 Element newTag = document.createElement("tag");
 		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmTag));
 		            	 eElement.appendChild(newTag);
+		            	 Main.printLine("Added scm connection element");
 		            }
 		         }
 	      }else{
@@ -194,6 +193,7 @@ public class PitestProxy {
 		      scmTag.setAttribute("developerConnection", EvaluationRunner.scmDevConnection);
 		      scmTag.setAttribute("tag", EvaluationRunner.scmTag);
 		      document.adoptNode(scmTag);
+		      Main.printLine("Added scm connection");
 	      }
 	      
 	     

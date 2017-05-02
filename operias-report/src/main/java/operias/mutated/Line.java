@@ -13,8 +13,7 @@ public class Line {
 	private int killedMutants;
 	private int noCoverageMutants;
 	private String blueOutput;
-	private String previousCommitID;
-	private String previousCommitMutationReportPath;
+	
 	
 	private ArrayList<Mutation> survivedMutantList;
 	
@@ -101,23 +100,6 @@ public class Line {
 	}
 
 
-	public String getPreviousCommitID() {
-		return previousCommitID;
-	}
-
-
-	public void setPreviousCommitID(String previousCommitID) {
-		this.previousCommitID = previousCommitID;
-	}
-
-
-	public String getPreviousCommitMutationReportPath() {
-		return previousCommitMutationReportPath;
-	}
-
-
-	public void setPreviousCommitMutationReportPath(String previousCommitMutationReportPath) {
-		this.previousCommitMutationReportPath = previousCommitMutationReportPath;
-	}
+	
 	
 }

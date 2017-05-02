@@ -64,9 +64,9 @@ public class Main {
 	 * @param line
 	 */
 	public static void printLine(String line) {
-		if(Configuration.isOutputEnabled()) {
+		if(Configuration.isOutputEnabled() && !line.startsWith("[Info]")) {
 			EvaluationOPiLogFile.write(line);
-			System.out.println(line);
+			//System.out.println(line);
 		}
 	}
 

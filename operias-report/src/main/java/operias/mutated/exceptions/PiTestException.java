@@ -16,11 +16,16 @@ public class PiTestException extends Exception{
 	      this.reason = reason;
 	    }
 	  
-	  public PiTestException(String commit, String reason, String previousFlag) {
+	  public PiTestException(String commit, String reason, boolean previousFlag) {
 		  super(commit+reason+previousFlag);
 		  this.commit=commit;
 	      this.reason = reason;
-	      this.flag = previousFlag;
+	      
+	      if(previousFlag){
+	    	  this.flag="previous commit run";
+	      }else{
+	    	  this.flag = "normal run";
+	      }
 	    }
 
 	  @Override
