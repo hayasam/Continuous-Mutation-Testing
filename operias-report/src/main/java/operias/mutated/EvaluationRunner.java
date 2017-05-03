@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import operias.Configuration;
 import operias.Main;
 import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.proxy.GitProxy;
@@ -31,6 +32,9 @@ public class EvaluationRunner {
 	public static int noMutationReport;
 	public static int withMutationReport;
 	
+	public static int updatedSCM;
+	public static int addedSCM;
+	
 	public static void main(String[] args){
 		
 		//RUN EVALUATION
@@ -44,7 +48,8 @@ public class EvaluationRunner {
 				
 				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
-		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 1;
+		//TODO set limit
+		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 3;
 		localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
 		
 		//JSoup
@@ -81,9 +86,10 @@ public class EvaluationRunner {
 		int total = commits.size();
 		EvaluationDataFile.write("");
 		EvaluationDataFile.write("commits that are analyzed (filtered in - crashes)");
-		EvaluationDataFile.write("Commit ID |@| #Mutation report files missing |@| File with mutation report");
+		EvaluationDataFile.write("Commit ID ~ #Mutation report files missing ~ File with mutation report");
 		for(String commitID: commits){
 			System.out.println("Analyzing  "+counter+" out of "+total+" ---> "+(counter*100/total)+"% DONE");
+			System.out.println("Looking at commit "+commitID);
 			noMutationReport = 0;
 			withMutationReport = 0;
 			commentLinesSkiped=0;
@@ -101,6 +107,10 @@ public class EvaluationRunner {
 				Main.printLine("[OPi+][ERROR]------------------------------------------------System crashed for commit: "+commitID);
 				EvaluationCrashStatus.recordSystemCrash(e.getInfo());
 				e.printStackTrace();
+			}catch(IncompatibleProjectException e){
+				Main.printLine("[OPi+][ERROR]------------------------------------------------Incompatible system for commit: "+commitID);
+				EvaluationCrashStatus.recordIncompatibleSystem(e.getInfo());
+				e.printStackTrace();
 			}catch(Exception e){
 				Main.printLine("[OPi+][ERROR]------------------------------------------------System crashed for unknown reason in commit: "+commitID);
 				String[] info = {commitID,"Fault in OPi+ logic. Exception was thrown during OPI+ excecution.",e.getMessage()};
@@ -111,6 +121,7 @@ public class EvaluationRunner {
 			System.out.println("Pitest crashes: "+EvaluationCrashStatus.pitestCrash);
 			System.out.println("Operias crashes: "+EvaluationCrashStatus.operiasCrash);
 			System.out.println("System crashes: "+EvaluationCrashStatus.systemCrash);
+			System.out.println("Incompatible system: "+EvaluationCrashStatus.incompatibleSystem);
 			float totalFailures = EvaluationCrashStatus.pitestCrash+EvaluationCrashStatus.operiasCrash+EvaluationCrashStatus.systemCrash;
 			System.out.println("So far "+(totalFailures*100/total)+"% failed");
 			counter++;
@@ -121,10 +132,12 @@ public class EvaluationRunner {
 		EvaluationDataFile.write("Pitest crashes: "+EvaluationCrashStatus.pitestCrash);
 		EvaluationDataFile.write("Operias crashes: "+EvaluationCrashStatus.operiasCrash);
 		EvaluationDataFile.write("System crashes: "+EvaluationCrashStatus.systemCrash);
+		EvaluationDataFile.write("Incompatible system: "+EvaluationCrashStatus.incompatibleSystem);
 		float totalFailures = EvaluationCrashStatus.pitestCrash+EvaluationCrashStatus.operiasCrash+EvaluationCrashStatus.systemCrash;
 		EvaluationDataFile.write("Out of the"+ total +"commits, "+(totalFailures*100/total)+"% failed");
 		EvaluationDataFile.write("Skipped "+commentLinesSkiped+" lines that where changed and also a comment");
-		
+		EvaluationDataFile.write("Had to update scm connection in pom file for "+updatedSCM+" commits");
+		EvaluationDataFile.write("Had to add scm connection in pom file for "+addedSCM+" commits");
 		
 		EvaluationDataFile.write("");
 		EvaluationDataFile.write("These are ALL commits from repository");
@@ -148,7 +161,7 @@ public class EvaluationRunner {
 		}
 	}
 
-	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) throws ExitRequiredException, PiTestException, SystemException{
+	private static void runOperiasMutated(String repoLink, String originalCommitID, String revisedCommitID) throws ExitRequiredException, PiTestException, SystemException, IncompatibleProjectException{
 				
 		String[] arguments = { "-oru", repoLink,
 							   "-rru", repoLink,

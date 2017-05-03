@@ -11,7 +11,7 @@ import operias.Main;
 public class EvaluationNoReportFileWriter {
 	
 
-		private static String SEPARATOR = "|@| ";
+		private static String SEPARATOR = "~";
 		
 		
 		

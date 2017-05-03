@@ -100,7 +100,7 @@ public class PitestProxy {
 	        }
 		} catch (MavenInvocationException|IllegalStateException e) {
 			Main.printLine("[OPi+][ERROR] could not run Pitest on last commit");
-			e.printStackTrace();
+			//e.printStackTrace();
 			throw new PiTestException(commitID, "Pitest Build Failed on current commit", previousFlag);
 			
 		}
@@ -154,51 +154,32 @@ public class PitestProxy {
 	      
 	      
 	    //add scm connection
-	      NodeList dList = document.getElementsByTagName("scm");
-	      if(dList.getLength()>0){
-	    	  Node node = dList.item(0);  
-	    	  if (node.getNodeType() == Node.ELEMENT_NODE)
+	      NodeList scmList = document.getElementsByTagName("scm");
+	      if(scmList.getLength()>0){
+		      for (int temp = 0; temp < scmList.getLength(); temp++)
+		      {
+		         Node node = scmList.item(temp);   
+		         if (node.getNodeType() == Node.ELEMENT_NODE)
 		         {
 		            Element eElement = (Element) node;
-		            
-		            if(eElement.getElementsByTagName("developerConnection").getLength()==0){
-		            	 Element newTag = document.createElement("developerConnection");
-		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmDevConnection));
-		            	 eElement.appendChild(newTag);
-		            	 Main.printLine("Added scm connection element");
-		            }
-		            if(eElement.getElementsByTagName("url").getLength()==0){
-		            	 Element newTag = document.createElement("url");
-		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmURL));
-		            	 eElement.appendChild(newTag);
-		            	 Main.printLine("Added scm connection element");
-		            }
-		            if(eElement.getElementsByTagName("connection").getLength()==0){
-		            	 Element newTag = document.createElement("connection");
-		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmConnection));
-		            	 eElement.appendChild(newTag);
-		            	 Main.printLine("Added scm connection element");
-		            }
-		            if(eElement.getElementsByTagName("tag").getLength()==0){
-		            	 Element newTag = document.createElement("tag");
-		            	 newTag.appendChild(document.createTextNode(EvaluationRunner.scmTag));
-		            	 eElement.appendChild(newTag);
-		            	 Main.printLine("Added scm connection element");
-		            }
+		            processElement(document, eElement);
+		            Main.printLine("updated scm dependnecy");
+		            EvaluationRunner.updatedSCM++;
 		         }
+		      }
 	      }else{
-		      Element scmTag = document.createElement("scm"); // Element to be inserted 
-		      scmTag.setAttribute("url", EvaluationRunner.scmURL);
-		      scmTag.setAttribute("connection", EvaluationRunner.scmConnection);
-		      scmTag.setAttribute("developerConnection", EvaluationRunner.scmDevConnection);
-		      scmTag.setAttribute("tag", EvaluationRunner.scmTag);
-		      document.adoptNode(scmTag);
-		      Main.printLine("Added scm connection");
+	    	  Element scmElement = document.createElement("scm"); // Element to be inserted 
+	    	  processElement(document, scmElement);
+	          document.adoptNode(scmElement);
+	    	  
+	    	  NodeList depList = document.getElementsByTagName("dependencies");
+	    	  Element elem = (Element) depList.item(0);
+	    	  elem.getParentNode().insertBefore(scmElement, elem.getNextSibling());
+	    	  Main.printLine("added scm connection");
+	    	  EvaluationRunner.addedSCM++;
 	      }
 	      
 	     
-	      
-	      
 		// write the content into xml file
 		TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
@@ -208,6 +189,27 @@ public class PitestProxy {
 		
 	}
 
+	private static void processElement(Document document, Element eElement) {
+		processTag(document, eElement, "developerConnection", EvaluationRunner.scmDevConnection);
+        processTag(document, eElement, "url",EvaluationRunner.scmURL);
+        processTag(document, eElement, "connection",EvaluationRunner.scmConnection);
+        processTag(document, eElement, "tag", EvaluationRunner.scmTag);
+	}
+
+
+	private static void processTag(Document document, Element eElement, String name, String content) {
+		 if(eElement.getElementsByTagName(name).getLength()>0 && 
+        		!eElement.getElementsByTagName(name).item(0).getTextContent().equals(content)){
+        	 eElement.getElementsByTagName(name).item(0).setTextContent(content);
+        }else{
+        	
+        	Element newElement = document.createElement(name); // Element to be inserted 
+        	newElement.setTextContent(content);
+        	eElement.appendChild(newElement);
+    
+        }
+		
+	}
 
 	//get latest created folder
 	private static File getLatestFilefromDir(String dirPath){

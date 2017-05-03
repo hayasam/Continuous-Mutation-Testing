@@ -194,7 +194,10 @@ public class OPi {
 			
 			String codeLine = newLine.replaceAll("\\s+","");
 			if(codeLine.startsWith("//")||codeLine.startsWith("*")||codeLine.startsWith("/*")||codeLine.endsWith("*/")||
-					codeLine.startsWith("@Override")||codeLine.startsWith("import")||codeLine.startsWith("package")){
+					codeLine.startsWith("@Override")||codeLine.startsWith("import")||codeLine.startsWith("package") ||
+					codeLine.startsWith("{")|| codeLine.endsWith("}")|| codeLine.endsWith("};")||
+					codeLine.startsWith("<p>")|| codeLine.startsWith("</p>")||
+					codeLine.contains("a href")|| codeLine.isEmpty() || codeLine.startsWith("@")){
 				EvaluationRunner.commentLinesSkiped++;
 			}else{
 				Line currentLine = new Line(currentChange.getRevisedLineNumber()+i, changeType, coverageFlag, newLine, oldLine);

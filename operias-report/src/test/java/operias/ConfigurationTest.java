@@ -16,6 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.test.general.NoExitSecurityManager;
 @Ignore
 public class ConfigurationTest {
@@ -39,7 +40,11 @@ public class ConfigurationTest {
 	@Test
 	public void testDirectoryDefaultOverrulesGit() {
 		Configuration.setTemporaryDirectory(new File("").getAbsolutePath() + "/target/gittests");
-		Configuration.setOriginalDirectory("src/test/resources/validMavenDirectory");
+		try {
+			Configuration.setOriginalDirectory("src/test/resources/validMavenDirectory");
+		} catch (IncompatibleProjectException e1) {
+			e1.printStackTrace();
+		}
 		Configuration.setRevisedDirectory("src/test/resources/validMavenDirectory");
 		
 		Configuration.setRevisedRepositoryURL("https://github.com/soosterwaal/operias.git");
@@ -227,7 +232,7 @@ public class ConfigurationTest {
 		
 		Configuration.parseArguments(new String[] { "-v" });
 		assertEquals(true, Configuration.isOutputEnabled());
-		} catch (ExitRequiredException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -291,7 +296,7 @@ public class ConfigurationTest {
 		Configuration.parseArguments(new String[] { "--verbose" });
 		assertEquals(true, Configuration.isOutputEnabled());
 		
-		} catch (ExitRequiredException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -369,7 +374,7 @@ public class ConfigurationTest {
 		boolean throwsException = false;
 		try {
 			Configuration.setOriginalDirectory(invalidDirectory);
-		} catch (InvalidParameterException e) {
+		} catch (Exception e) {
 			throwsException = true;
 		}
 		
@@ -383,7 +388,7 @@ public class ConfigurationTest {
 		throwsException = false;
 		try {
 			Configuration.setOriginalDirectory(validDirectory);
-		} catch (InvalidParameterException e) {
+		} catch (Exception e) {
 			throwsException = true;
 		}
 		
@@ -395,7 +400,7 @@ public class ConfigurationTest {
 		throwsException = false;
 		try {
 			Configuration.setOriginalDirectory(null);
-		} catch (InvalidParameterException e) {
+		} catch (Exception e) {
 			throwsException = true;
 		}
 		
@@ -403,7 +408,11 @@ public class ConfigurationTest {
 		
 		assertNull(Configuration.getOriginalDirectory());
 		
-		Configuration.setOriginalDirectory(validMavenDirectory);
+		try {
+			Configuration.setOriginalDirectory(validMavenDirectory);
+		} catch (IncompatibleProjectException e) {
+			e.printStackTrace();
+		}
 		
 		assertEquals("Source directory should have been set to " + validMavenDirectory, validMavenDirectory, Configuration.getOriginalDirectory());
 	}

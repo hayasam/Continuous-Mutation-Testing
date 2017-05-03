@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 import operias.mutated.*;
 import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.record.files.EvaluationOPiLogFile;
@@ -24,13 +25,14 @@ public class Main {
 	 * needs to be compared and to which branch it must be compared.
 	 * @throws PiTestException 
 	 * @throws SystemException 
+	 * @throws IncompatibleProjectException 
 	 * 
 	 
 	 * 
 	 */
 	
 	
-	public static void mutatedOperias(String[] args) throws ExitRequiredException, PiTestException, SystemException{
+	public static void mutatedOperias(String[] args) throws ExitRequiredException, PiTestException, SystemException, IncompatibleProjectException{
 		
 		Configuration.parseArguments(args);
 		// Check if the directories were set
@@ -66,7 +68,7 @@ public class Main {
 	public static void printLine(String line) {
 		if(Configuration.isOutputEnabled() && !line.startsWith("[Info]")) {
 			EvaluationOPiLogFile.write(line);
-			//System.out.println(line);
+			System.out.println(line);
 		}
 	}
 

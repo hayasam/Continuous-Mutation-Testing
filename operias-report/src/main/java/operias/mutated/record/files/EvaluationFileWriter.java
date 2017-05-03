@@ -15,7 +15,7 @@ import operias.mutated.Mutation;
 
 public class EvaluationFileWriter {
 
-	private static String SEPARATOR = "|@| ";
+	private static String SEPARATOR = "~";
 	
 	private static String commitID;
 	private static String filePath;
@@ -98,6 +98,7 @@ public class EvaluationFileWriter {
 		String text = connect();
 		text = text+SEPARATOR+extraColumn;
 		write(text);
+		System.out.println(text);
 		
 	}
 	
@@ -105,7 +106,6 @@ public class EvaluationFileWriter {
 	public static void recordNewLine(){
 		String text = connect();
 		write(text);
-		
 	}
 	
 	
@@ -136,9 +136,23 @@ public class EvaluationFileWriter {
 	public static void print(ArrayList<MutatedFile> mutatedFiles) {
 		
 		for(MutatedFile mutatedFile: mutatedFiles){
+			
 			commitID= mutatedFile.getCommitID();
-			filePath = mutatedFile.getSystemFileName();
-			fileName = mutatedFile.getFileName();
+			if(commitID.isEmpty()){
+				commitID=" ";
+			}
+			
+			filePath= mutatedFile.getSystemFileName();
+			if(filePath.isEmpty()){
+				filePath=" ";
+			}
+			
+			fileName= mutatedFile.getFileName();
+			if(fileName.isEmpty()){
+				fileName=" ";
+			}
+			
+			
 			
 			String mutationReportPath = mutatedFile.getMutationReportPath();
 			if(mutationReportPath==null){
@@ -166,27 +180,27 @@ public class EvaluationFileWriter {
 						mutantDescription= m.getDescription();
 						mutantStatus = m.getStatus();
 						recordNewLine();
+						
 						mutantName = "";
 						mutantDescription= "";
 						mutantStatus ="";
 					}
 					if(survivedMutantList.isEmpty()){
 						recordNewLine();
-						lineNumber = -1;
-						oldCodeLine = "";
-						newCodeLine = "";
-						changeType = "";
-						coverage = false;
-						blueOutput = "";
 					}
-					
+					lineNumber = -1;
+					oldCodeLine = "";
+					newCodeLine = "";
+					changeType = "";
+					coverage = false;
+					blueOutput = "";
 				}
 				if(diffLines.isEmpty()){
-					recordNewLine("this should not happen");
+					recordNewLine(); //"this should not happen"
 				}
-				commitID= "";
-				filePath = "";
-				fileName ="";
+				commitID= " ";
+				filePath = " ";
+				fileName =" ";
 			}
 			
 		}

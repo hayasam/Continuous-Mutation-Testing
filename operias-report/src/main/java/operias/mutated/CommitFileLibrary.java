@@ -31,7 +31,8 @@ public class CommitFileLibrary{
 		if(prefilteredCommitID.isEmpty()){
 			for(String commitID: commitFileLibrary.keySet()){
 				if(OPiPrefilter(commitFileLibrary.get(commitID),commitID)){
-					//if(commitID.equals("e613360fa4f0cd3bdfdece02d2bc1b58be640cac"))
+					//TODO this commit seems to block the process
+					if(!commitID.equals("e613360fa4f0cd3bdfdece02d2bc1b58be640cac") && !commitID.equals("a657d090e2f127ebdce131f1f97e7758a8ddc463"))
 						prefilteredCommitID.add(commitID);
 				}
 			}

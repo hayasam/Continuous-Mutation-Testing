@@ -5,6 +5,7 @@ import java.security.InvalidParameterException;
 
 import operias.git.Git;
 import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 
 
 /**
@@ -97,8 +98,9 @@ public class Configuration {
 	 * Parse the arguments passed by the command line
 	 * @param args
 	 * @throws ExitRequiredException 
+	 * @throws IncompatibleProjectException 
 	 */
-	public static void parseArguments(String[] args) throws ExitRequiredException {
+	public static void parseArguments(String[] args) throws ExitRequiredException, IncompatibleProjectException {
 		try {
 			int i = 0;
 			while(i < args.length) {
@@ -146,7 +148,9 @@ public class Configuration {
 					//System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
 				}
 			}
-		} catch (Exception e) {
+		} catch(IncompatibleProjectException e){
+			throw e;
+		}catch (Exception e) {
 			throw new ExitRequiredException(OperiasStatus.INVALID_ARGUMENTS);
 			//System.exit(OperiasStatus.INVALID_ARGUMENTS.ordinal());
 		}
@@ -171,12 +175,14 @@ public class Configuration {
 	 * Sets and checks the repository directory, will throw an exception if it is an invalid directory or does not contain a git repo
 	 * A valid directory must also contain a pom.xml file to ensure that it is a maven project.
 	 * @param originalDirectory
+	 * @throws IncompatibleProjectException 
 	 */
-	public static void setOriginalDirectory(String originalDirectory) {
+	public static void setOriginalDirectory(String originalDirectory) throws IncompatibleProjectException {
 		if (checkValidDirectory(originalDirectory)) {
 			Configuration.originalDirectory = originalDirectory;
 		} else {
-			throw new InvalidParameterException("Error: '" + originalDirectory + "' is not a valid directory for Operias");
+			//throw new InvalidParameterException("Error: '" + originalDirectory + "' is not a valid directory for Operias");
+			throw new IncompatibleProjectException(getOriginalCommitID());
 		}
 	}
 	
@@ -269,9 +275,10 @@ public class Configuration {
 	/**
 	 * Set up the original and/or revised directories according to the provided arguments
 	 * @throws ExitRequiredException 
+	 * @throws IncompatibleProjectException 
 	 * @throws Exception 
 	 */
-	public static void setUpDirectoriesThroughGit() throws ExitRequiredException  {
+	public static void setUpDirectoriesThroughGit() throws ExitRequiredException, IncompatibleProjectException  {
 		try {
 			if (Configuration.getOriginalDirectory() == null) {
 				Configuration.setOriginalDirectory(setUpDirectoriesThroughGit(Configuration.getOriginalRepositoryURL(), Configuration.getOriginalBranchName(), Configuration.getOriginalCommitID()));
@@ -280,7 +287,9 @@ public class Configuration {
 			if (Configuration.getRevisedDirectory() == null) {
 				Configuration.setRevisedDirectory(setUpDirectoriesThroughGit(Configuration.getRevisedRepositoryURL(), Configuration.getRevisedBranchName(), Configuration.getRevisedCommitID()));
 			}
-		} catch(Exception e) {
+		} catch(IncompatibleProjectException e){
+			throw e;
+		}catch(Exception e) {
 			e.printStackTrace();
 			Main.printLine("[Error] Error setting up directory through git");
 			throw new ExitRequiredException(OperiasStatus.INVALID_ARGUMENTS);

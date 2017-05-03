@@ -101,8 +101,9 @@ public class Operias {
 				Main.printLine("[[OPi+]]----START---------------------------------------------");
 				new OPi(report);
 				Main.printLine("[[OPi+]]----END---------------------------------------------");
-			}
-						
+			}else{
+				throw new ExitRequiredException("One of the threads in operias crashed");
+			}		
 		} catch (InterruptedException e1) {
 			//System.exit(OperiasStatus.ERROR_THREAD_JOINING.ordinal());
 			Main.printLine("[Operias] error when joining threads");

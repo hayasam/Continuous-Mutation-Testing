@@ -21,7 +21,7 @@ import operias.mutated.MutatedFile;
 
 public class EvaluationDataFile {
 
-		private static final String SEPARATOR = "|@|";
+		private static final String SEPARATOR = "~";
 		private static BufferedWriter bw;
 		private static String evaluationDATAFileName;
 		private static FileOutputStream fos;

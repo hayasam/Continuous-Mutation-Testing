@@ -16,11 +16,13 @@ public class EvaluationCrashStatus {
 	public static int operiasCrash;
 	public static int systemCrash;
 	public static int fileMutationPathCrash;
-	private static String SEPARATOR = "|@| ";
+	public static int incompatibleSystem;
+	private static String SEPARATOR = "~";
 	
 	private static BufferedWriter bw;
 	private static String evaluationDATAFileName;
 	private static FileOutputStream fos;
+	
 	
 	public EvaluationCrashStatus(String projectName, String path) throws IOException{
 		
@@ -29,6 +31,7 @@ public class EvaluationCrashStatus {
 		operiasCrash=0;
 		systemCrash=0;
 		fileMutationPathCrash=0;
+		incompatibleSystem=0;
 		
 		String fileName = projectName+"CRASH";
 		evaluationDATAFileName = path+"/"+fileName+".csv";
@@ -88,6 +91,14 @@ public class EvaluationCrashStatus {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+
+
+
+	public static void recordIncompatibleSystem(String[] info) {
+		incompatibleSystem++;
+		write("Incompatible System "+SEPARATOR+" "+info[0]+" "+SEPARATOR+" "+info[1]);
 		
 	}
 	
