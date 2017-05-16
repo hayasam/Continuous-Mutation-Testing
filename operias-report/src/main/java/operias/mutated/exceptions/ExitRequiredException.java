@@ -5,8 +5,11 @@ import operias.OperiasStatus;
 
 public class ExitRequiredException extends Exception {
 
+	String text;
+	
 	    public ExitRequiredException(String message) {
 	        super(message);
+	        text = message;
 	    }
 
 		
@@ -15,6 +18,9 @@ public class ExitRequiredException extends Exception {
 			Main.printLine(errorFileDiffReportGeneration.toString());
 		}
 
+		public String getText(){
+			return text;
+		}
 		
 	
 }

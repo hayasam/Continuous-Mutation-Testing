@@ -154,7 +154,9 @@ public class GitProxy {
 		return settings.MAVEN_PATH;
 	}
 	
-	private static boolean buildRepoProject() {
+	
+	
+	public static boolean buildRepoProject() {
 		   
         /*
          It is expected behaviour for no mutants to be found if you clone a project and directly run a mutation coverage goal. 

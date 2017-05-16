@@ -1,0 +1,90 @@
+package operias.mutated.record.files;
+
+public class EvaluationMutantOverview {
+	
+	
+	
+	public static int CONDITIONALS_BOUNDARY_MUTATOR;
+	public static int ARGUMENT_PROPAGATION_MUTATOR;
+	public static int INCREMENTS_MUTATOR;
+	public static int INLINE_CONSTANT_MUTATOR;
+	public static int MATH_MUTATOR;
+	public static int NEGATE_CONDITIONALS_MUTATOR;
+	public static int REMOVE_CONDITIONALS_MUTATOR;
+	public static int RETURN_VALS_MUTATOR;
+	public static int REMOVE_INCREMENTS_MUTATOR;
+	public static int REMOVE_SWITCH_MUTATOR;
+	public static int SWITCH_MUTATOR;
+	public static int MEMBER_VARIABLE_MUTATOR;
+	public static int INVERT_NEGS_MUTATOR;
+	public static int METHOD_CALL_VISITOR;
+	public static int NONParsable;
+	
+	
+	public EvaluationMutantOverview(){
+		CONDITIONALS_BOUNDARY_MUTATOR = 0;
+		ARGUMENT_PROPAGATION_MUTATOR = 0;
+		INCREMENTS_MUTATOR = 0;
+		INLINE_CONSTANT_MUTATOR = 0;
+		MATH_MUTATOR = 0;
+		NEGATE_CONDITIONALS_MUTATOR = 0;
+		REMOVE_CONDITIONALS_MUTATOR = 0;
+		RETURN_VALS_MUTATOR = 0;
+		REMOVE_INCREMENTS_MUTATOR = 0;
+		REMOVE_SWITCH_MUTATOR = 0;
+		SWITCH_MUTATOR = 0;
+		MEMBER_VARIABLE_MUTATOR = 0;
+		INVERT_NEGS_MUTATOR = 0;
+		METHOD_CALL_VISITOR = 0;
+		NONParsable = 0;
+	}
+	
+	public static String getOverview(){
+		String overview = "";
+		overview+= "\n"+"CONDITIONALS_BOUNDARY_MUTATOR: "+CONDITIONALS_BOUNDARY_MUTATOR;
+		overview+= "\n"+"ARGUMENT_PROPAGATION_MUTATOR: "+ARGUMENT_PROPAGATION_MUTATOR;
+		overview+= "\n"+"INCREMENTS_MUTATOR: "+INCREMENTS_MUTATOR;
+		overview+= "\n"+"INLINE_CONSTANT_MUTATOR: "+INLINE_CONSTANT_MUTATOR;
+		overview+= "\n"+"MATH_MUTATOR: "+MATH_MUTATOR;
+		overview+= "\n"+"NEGATE_CONDITIONALS_MUTATOR: "+NEGATE_CONDITIONALS_MUTATOR;
+		overview+= "\n"+"REMOVE_CONDITIONALS_MUTATOR: "+REMOVE_CONDITIONALS_MUTATOR;
+		overview+= "\n"+"RETURN_VALS_MUTATOR: "+RETURN_VALS_MUTATOR;
+		overview+= "\n"+"REMOVE_INCREMENTS_MUTATOR: "+REMOVE_INCREMENTS_MUTATOR;
+		overview+= "\n"+"REMOVE_SWITCH_MUTATOR: "+REMOVE_SWITCH_MUTATOR;
+		overview+= "\n"+"SWITCH_MUTATOR: "+SWITCH_MUTATOR;
+		overview+= "\n"+"MEMBER_VARIABLE_MUTATOR: "+MEMBER_VARIABLE_MUTATOR;
+		overview+= "\n"+"INVERT_NEGS_MUTATOR: "+INVERT_NEGS_MUTATOR;
+		overview+= "\n"+"METHOD_CALL_VISITOR: "+METHOD_CALL_VISITOR;
+		overview+= "\n"+"Not parsable: "+NONParsable;
+		
+		return overview;
+		
+	}
+	
+	
+	public static void increment(String name, String description){
+		switch(name){
+		case "CONDITIONALS_BOUNDARY_MUTATOR": CONDITIONALS_BOUNDARY_MUTATOR++;break;
+		case "ARGUMENT_PROPAGATION_MUTATOR": ARGUMENT_PROPAGATION_MUTATOR++;break;
+		case "INCREMENTS_MUTATOR": INCREMENTS_MUTATOR++;break;
+		case "INLINE_CONSTANT_MUTATOR": INLINE_CONSTANT_MUTATOR++;break;
+		case "MATH_MUTATOR": MATH_MUTATOR++;break;
+		case "NEGATE_CONDITIONALS_MUTATOR": NEGATE_CONDITIONALS_MUTATOR++;break;
+		case "REMOVE_CONDITIONALS_MUTATOR": REMOVE_CONDITIONALS_MUTATOR++;break;
+		case "RETURN_VALS_MUTATOR": RETURN_VALS_MUTATOR++;break;
+		case "REMOVE_INCREMENTS_MUTATOR": REMOVE_INCREMENTS_MUTATOR++;break;
+		case "REMOVE_SWITCH_MUTATOR": REMOVE_SWITCH_MUTATOR++;break;
+		case "SWITCH_MUTATOR": SWITCH_MUTATOR++;break;
+		case "MEMBER_VARIABLE_MUTATOR": MEMBER_VARIABLE_MUTATOR++;break;
+		case "INVERT_NEGS_MUTATOR": INVERT_NEGS_MUTATOR++;break;
+		case "METHOD_CALL_VISITOR": METHOD_CALL_VISITOR++;break;
+		default: {NONParsable++;
+					break;
+			}
+		
+		
+		}
+	}
+	
+
+}

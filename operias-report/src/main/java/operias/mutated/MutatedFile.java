@@ -15,6 +15,7 @@ import operias.Main;
 import operias.mutated.exceptions.FileException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.record.files.EvaluationFileWriter;
+import operias.mutated.record.files.EvaluationMutantOverview;
 
 public class MutatedFile {
 
@@ -115,7 +116,7 @@ public class MutatedFile {
 			int counter =0;
 			while(counter<coveredContent.size()){
 				int codeLineNumber = Integer.parseInt(coveredContent.get(counter).ownText());
-				Line line = lineArrayContains(diffLines, codeLineNumber);
+				Line line = lineArrayContains(diffLines, codeLineNumber);				
 				if(line != null){
 					processChangedCoveredMutants(counter, coveredContent, line);
 					counter++;
@@ -133,7 +134,7 @@ public class MutatedFile {
 				Line line = lineArrayContains(diffLines, codeLineNumber);
 				if(line != null){
 					line.setBlueOutput("1");
-					line.incrementNoCoverage();
+					line.setNoCoverage();
 					counter++;
 				}else{
 					counter++;
@@ -204,21 +205,40 @@ public class MutatedFile {
 				int endOfDescription = description.indexOf(status)-3;
 				String mutantDescription = description.substring(0, endOfDescription);
 				String mutantName = parseDescriptionToMutantName(description);
-				mutations.add(new Mutation(mutantName, mutantDescription, status));
-				line.incrementSuvived();
+				if(mutantName!=null){
+					mutations.add(new Mutation(mutantName, mutantDescription, status));
+					line.incrementSuvived();
+				}
 			}else if (description.contains("KILLED")){
-				line.incrementKilled();
+				status = "KILLED";
+				//record what type of mutant is being killed
+				int endOfDescription = description.indexOf(status)-3;
+				String mutantDescription = description.substring(0, endOfDescription);
+				String mutantName = parseDescriptionToMutantName(description);
+				if(mutantName!=null){
+					EvaluationMutantOverview.increment(mutantName, description);
+					line.incrementKilled();
+				}
 			}else if(description.contains("NO_COVERAGE")){
-				line.incrementNoCoverage();
+				line.setNoCoverage();
 			}
 		}
 		if(mutations.isEmpty()){
 			line.setBlueOutput("4");
 			Main.printLine("[OPi+][BLUE-4] all mutants are killed by tests for "+line.getNumber());
 		}else{
-			line.setSurvivedMutantList(mutations);
-			line.setBlueOutput("5");
-			Main.printLine("[OPi+][BLUE-5] we have surviving mutants for line "+line.getNumber());
+			
+			if(line.hasTestCoverage()){
+				line.setSurvivedMutantList(mutations);
+				line.setBlueOutput("5");
+				Main.printLine("[OPi+][BLUE-5] we have surviving mutants for line "+line.getNumber());
+			}else{
+				//Pitest looks at line coverage. So we rely on Operias branch coverage. we need good coverage for mutation testing
+				line.setBlueOutput("1");
+				Main.printLine("[OPi+][BLUE-1] the coverage is not good enough (there is no full branch coverage)");
+			}
+			
+			
 		}
 		
 	}
@@ -258,7 +278,7 @@ public class MutatedFile {
 			mutantName = "REMOVE_INCREMENTS_MUTATOR";
 			mutationDescription = "Removed increment";
 		}else if(description.contains("RemoveSwitch")){
-			mutantName = "REMOVE_SWITCH_MUTATOR_";
+			mutantName = "REMOVE_SWITCH_MUTATOR";
 			mutationDescription = "RemoveSwitch mutation";
 		}else if(description.contains("Switch mutation")){
 			mutantName = "SWITCH_MUTATOR";
@@ -271,7 +291,7 @@ public class MutatedFile {
 			mutationDescription = "removed negation";
 		}else if(description.contains("removed call to")){
 			mutantName = "METHOD_CALL_VISITOR";
-			mutationDescription = "Removed a method call. This is one of 3 posible mutants that have the same description: NON_VOID_METHOD_CALL_MUTATOR, VOID_METHOD_CALL_MUTATOR or CONSTRUCTOR_MUTATOR";
+			mutationDescription = "Removed a method call. This is one of 3 posible mutants that have the same description: NON_VOID_METHOD_CALL_MUTATOR, VOID_METHOD_CALL_MUTATOR or CONSTRUCTOR_MUTATOR, actual description is: "+description;
 		}
 		return mutantName;
 	}

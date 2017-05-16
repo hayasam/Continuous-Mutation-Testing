@@ -62,48 +62,54 @@ public class PitestProxy {
 			
 		}
         
-		//setup Pitest on last commit
-		InvocationRequest request = new DefaultInvocationRequest();
-        request.setPomFile(pomFile);
+        if(GitProxy.buildRepoProject()){
+        	//setup Pitest on last commit
+    		InvocationRequest request = new DefaultInvocationRequest();
+            request.setPomFile(pomFile);
+            
+            request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -Dmutators=ALL -l logfile.txt" ) );
+            //-DtargetTests="+GitProxy.getGroupArtifactPath()+" - used to fix the pitest bug but apparently it works for JSoup
+            //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
+            
+            //TODO obs need this -DtargetTests=groupID.artifactID.*   for testSettings to run properly = mutants that are killed/survived not only no coverage
+            //-l logfile.txt
+            //mvn console output is stored in logfile.txt
+    		
+            
+            
+            //run Pitest on last commit
+            InvocationResult result;
+    		try {
+    			 
+    			result = invoker.execute( request );
+    			if ( result.getExitCode() != 0 )
+    	        {
+    	            throw new IllegalStateException( "Build failed." );
+    	        }else{
+    	        	/* the build still succeeds if no mutations are found. 
+    	        	 * in this case there is no path for the mutation report 
+    	        	 * and there is no need to further analyze
+    	        	 */
+    	        	File logFilePath =  new File( settings.pomPath.getAbsolutePath()+"/logfile.txt");
+    	        	if(isPitestAnalysis(logFilePath, commitID)){
+    	        		Main.printLine("[OPi+][INFO] successfully run Pitest on last commit");
+    		        	mutationPath = settings.pomPath+"/target/pit-reports";
+    		        	mutationPath = getLatestFilefromDir(mutationPath).getAbsolutePath();
+    		        	
+    		        	Main.printLine("[OPi+][INFO] My MUTATION REPORT path is: "+mutationPath+" for commit "+commitID);
+    	        	}
+    	        }
+    		} catch (MavenInvocationException|IllegalStateException e) {
+    			Main.printLine("[OPi+][ERROR] could not run Pitest on last commit");
+    			//e.printStackTrace();
+    			throw new PiTestException(commitID, "Pitest Build Failed on current commit", previousFlag);
+    			
+    		}
+        	
+        }else{
+        	throw new PiTestException(commitID, "could not clean the project before running pitest");
+        }
         
-        request.setGoals( Collections.singletonList( "org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -Dmutators=ALL -l logfile.txt" ) );
-        //-DtargetTests="+GitProxy.getGroupArtifactPath()+" - used to fix the pitest bug but apparently it works for JSoup
-        //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
-        
-        //TODO obs need this -DtargetTests=groupID.artifactID.*   for testSettings to run properly = mutants that are killed/survived not only no coverage
-        //-l logfile.txt
-        //mvn console output is stored in logfile.txt
-		
-        
-        
-        //run Pitest on last commit
-        InvocationResult result;
-		try {
-			 
-			result = invoker.execute( request );
-			if ( result.getExitCode() != 0 )
-	        {
-	            throw new IllegalStateException( "Build failed." );
-	        }else{
-	        	/* the build still succeeds if no mutations are found. 
-	        	 * in this case there is no path for the mutation report 
-	        	 * and there is no need to further analyze
-	        	 */
-	        	File logFilePath =  new File( settings.pomPath.getAbsolutePath()+"/logfile.txt");
-	        	if(isPitestAnalysis(logFilePath, commitID)){
-	        		Main.printLine("[OPi+][INFO] successfully run Pitest on last commit");
-		        	mutationPath = settings.pomPath+"/target/pit-reports";
-		        	mutationPath = getLatestFilefromDir(mutationPath).getAbsolutePath();
-		        	
-		        	Main.printLine("[OPi+][INFO] My MUTATION REPORT path is: "+mutationPath+" for commit "+commitID);
-	        	}
-	        }
-		} catch (MavenInvocationException|IllegalStateException e) {
-			Main.printLine("[OPi+][ERROR] could not run Pitest on last commit");
-			//e.printStackTrace();
-			throw new PiTestException(commitID, "Pitest Build Failed on current commit", previousFlag);
-			
-		}
 		return mutationPath;
 		
 	}
@@ -126,7 +132,7 @@ public class PitestProxy {
 		}
 	}
 
-	private static void updatePomFileForMutationProcess(File pomFile) throws ParserConfigurationException, SAXException, IOException, TransformerException {
+	public static void updatePomFileForMutationProcess(File pomFile) throws ParserConfigurationException, SAXException, IOException, TransformerException {
 		
 		//open pom file
 	      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

@@ -15,6 +15,7 @@ import operias.mutated.proxy.ThirdPartyProxySeetings;
 import operias.mutated.record.files.EvaluationCrashStatus;
 import operias.mutated.record.files.EvaluationDataFile;
 import operias.mutated.record.files.EvaluationFileWriter;
+import operias.mutated.record.files.EvaluationMutantOverview;
 import operias.mutated.record.files.EvaluationNoReportFileWriter;
 import operias.mutated.record.files.EvaluationOPiLogFile;
 
@@ -49,7 +50,7 @@ public class EvaluationRunner {
 				//"https://github.com/junit-team/junit5.git";
 		String MAVEN_PATH = "/usr/share/maven";
 		//TODO set limit
-		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 3;
+		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 1;
 		localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
 		
 		//JSoup
@@ -70,6 +71,7 @@ public class EvaluationRunner {
 			EvaluationDataFile dataFile = new EvaluationDataFile(projectName, localPathForOPiReport);
 			EvaluationCrashStatus crashFile = new EvaluationCrashStatus(projectName, localPathForOPiReport);
 			EvaluationNoReportFileWriter noReportCommits = new EvaluationNoReportFileWriter(projectName, localPathForOPiReport);
+			EvaluationMutantOverview mutantOverview = new EvaluationMutantOverview();
 			
 			EvaluationDataFile.write("Project repository link: "+REMOTE_URL);
 			
@@ -99,7 +101,10 @@ public class EvaluationRunner {
 				EvaluationDataFile.write(commitID, noMutationReport, withMutationReport);
 			} catch (ExitRequiredException e) {
 				Main.printLine("[OPi+][ERROR]------------------------------------------------Operias crashed for commit: "+commitID);
-				EvaluationCrashStatus.recordOperiasCrash(commitID, e.getCause().toString());
+				try{EvaluationCrashStatus.recordOperiasCrash(commitID, e.getText());}
+				catch(Exception e2){
+					EvaluationCrashStatus.operiasCrash++;
+				}
 			} catch (PiTestException e) {
 				Main.printLine("[OPi+][ERROR]------------------------------------------------Pitest crashed for commit: "+commitID);
 				EvaluationCrashStatus.recordPitestCrash(e.getInfo());
@@ -138,6 +143,7 @@ public class EvaluationRunner {
 		EvaluationDataFile.write("Skipped "+commentLinesSkiped+" lines that where changed and also a comment");
 		EvaluationDataFile.write("Had to update scm connection in pom file for "+updatedSCM+" commits");
 		EvaluationDataFile.write("Had to add scm connection in pom file for "+addedSCM+" commits");
+		EvaluationDataFile.write(EvaluationMutantOverview.getOverview());
 		
 		EvaluationDataFile.write("");
 		EvaluationDataFile.write("These are ALL commits from repository");

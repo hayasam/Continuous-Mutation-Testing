@@ -29,7 +29,7 @@ public class EvaluationFileWriter {
 	private static boolean coverage;
 	private static int survived;
 	private static int killed;
-	private static int noCoverage;
+	private static boolean noCoverage;
 	
 	private static String mutantName;
 	private static String mutantDescription;
@@ -60,7 +60,7 @@ public class EvaluationFileWriter {
 		  	bw = new BufferedWriter(new OutputStreamWriter(fos));
 		    write("CommitID"+SEPARATOR+"Path in project"+SEPARATOR
 		    		+"File Name"+SEPARATOR+"LineNumber"+SEPARATOR
-		    		+"Old Line"+SEPARATOR+"New Line"+SEPARATOR
+		    		+"New Line"+SEPARATOR
 		    		+"Change type"+SEPARATOR
 		    		+"Test Coverage"+SEPARATOR+"#Survived"+SEPARATOR
 		    								  +"#Killed"+SEPARATOR

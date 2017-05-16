@@ -28,12 +28,17 @@ public class CommitFileLibrary{
 	}
 	
 	public ArrayList<String> getPrefilteredCommitList(){
+		boolean flag = false;
 		if(prefilteredCommitID.isEmpty()){
 			for(String commitID: commitFileLibrary.keySet()){
 				if(OPiPrefilter(commitFileLibrary.get(commitID),commitID)){
-					//TODO this commit seems to block the process
-					if(!commitID.equals("e613360fa4f0cd3bdfdece02d2bc1b58be640cac") && !commitID.equals("a657d090e2f127ebdce131f1f97e7758a8ddc463"))
+					if(commitID.equals("f11c3b4f92660b44dae8f6541c9b6908e6196b3a"))
+						flag = true;
+					if(!commitID.equals("")&& flag){
+						//TODO this commit seems to block the process
 						prefilteredCommitID.add(commitID);
+						flag=false;
+					}
 				}
 			}
 			
@@ -65,7 +70,8 @@ public class CommitFileLibrary{
 			   counter++;
 			}
 		}
-		if(counter>=COMMIT_MUTATION_CHANGE_LOWER_LIMIT){
+		//TODO changed lower limit logic
+		if(counter==COMMIT_MUTATION_CHANGE_LOWER_LIMIT){
 			return true;
 		}
 		return false;

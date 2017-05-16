@@ -11,7 +11,7 @@ public class Line {
 	private String oldLine;
 	private int survivedMutants;
 	private int killedMutants;
-	private int noCoverageMutants;
+	private boolean noCoverageMutants;
 	private String blueOutput;
 	
 	
@@ -26,7 +26,7 @@ public class Line {
 		 this.oldLine=oldLine;
 		 survivedMutants=0;
 		 killedMutants=0;
-		 noCoverageMutants=0;
+		 noCoverageMutants=false;
 		 survivedMutantList = new ArrayList<Mutation>();
 		 
 		 if(type.equals("UPDATE")){
@@ -51,8 +51,8 @@ public class Line {
 		killedMutants++;
 	}
 	
-	public void incrementNoCoverage(){
-		noCoverageMutants++;
+	public void setNoCoverage(){
+		noCoverageMutants=true;
 	}
 	
 	
@@ -64,7 +64,7 @@ public class Line {
 		return killedMutants;
 	}
 	
-	public int getNoCoverage(){
+	public boolean getNoCoverage(){
 		return noCoverageMutants;
 	}
 		
