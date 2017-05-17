@@ -79,6 +79,7 @@ public class EvaluationMutantOverview {
 		case "INVERT_NEGS_MUTATOR": INVERT_NEGS_MUTATOR++;break;
 		case "METHOD_CALL_VISITOR": METHOD_CALL_VISITOR++;break;
 		default: {NONParsable++;
+					
 					break;
 			}
 		

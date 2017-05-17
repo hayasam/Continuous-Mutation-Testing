@@ -62,7 +62,8 @@ public class PitestProxy {
 			
 		}
         
-        if(GitProxy.buildRepoProject()){
+        
+        cleanProject(pomFile, invoker, commitID);
         	//setup Pitest on last commit
     		InvocationRequest request = new DefaultInvocationRequest();
             request.setPomFile(pomFile);
@@ -106,15 +107,32 @@ public class PitestProxy {
     			
     		}
         	
-        }else{
-        	throw new PiTestException(commitID, "could not clean the project before running pitest");
-        }
-        
 		return mutationPath;
 		
 	}
 	
 	
+	private static void cleanProject(File pomFile, Invoker invoker, String commitID) throws PiTestException {
+		//setup Pitest on last commit
+		InvocationRequest request = new DefaultInvocationRequest();
+        request.setPomFile(pomFile);
+        
+        request.setGoals( Collections.singletonList( "clean package -l ignoreLogfile.txt" ) );
+        InvocationResult result;
+		try {
+			result = invoker.execute( request );
+			if ( result.getExitCode() != 0 )
+	        {
+	            throw new IllegalStateException( "Build failed for refreshing the bytecode in last commit "+commitID );
+	        }
+		} catch (MavenInvocationException|IllegalStateException e) {
+			Main.printLine("[OPi+][ERROR] could not refresh bytecode for pitest on last commit");
+			//e.printStackTrace();
+			throw new PiTestException(commitID, "Pitest Build Failed on current commit", false);
+		}
+	}
+
+
 	private static boolean isPitestAnalysis(File logFilePath, String commitID) throws SystemException, PiTestException {
 		
 		try{
@@ -196,25 +214,23 @@ public class PitestProxy {
 	}
 
 	private static void processElement(Document document, Element eElement) {
-		processTag(document, eElement, "developerConnection", EvaluationRunner.scmDevConnection);
-        processTag(document, eElement, "url",EvaluationRunner.scmURL);
-        processTag(document, eElement, "connection",EvaluationRunner.scmConnection);
-        processTag(document, eElement, "tag", EvaluationRunner.scmTag);
+		 processTag(document, eElement, "url",EvaluationRunner.scmURL);
+		 processTag(document, eElement, "connection",EvaluationRunner.scmConnection);
+		 processTag(document, eElement, "tag", EvaluationRunner.scmTag);
+		 processTag(document, eElement, "developerConnection", EvaluationRunner.scmDevConnection);
 	}
 
 
 	private static void processTag(Document document, Element eElement, String name, String content) {
-		 if(eElement.getElementsByTagName(name).getLength()>0 && 
-        		!eElement.getElementsByTagName(name).item(0).getTextContent().equals(content)){
-        	 eElement.getElementsByTagName(name).item(0).setTextContent(content);
-        }else{
-        	
+		if(eElement.getElementsByTagName(name).getLength()>0){
+			if(!eElement.getElementsByTagName(name).item(0).getTextContent().equals(content)){
+				eElement.getElementsByTagName(name).item(0).setTextContent(content);
+			}
+		}else{
         	Element newElement = document.createElement(name); // Element to be inserted 
         	newElement.setTextContent(content);
         	eElement.appendChild(newElement);
-    
         }
-		
 	}
 
 	//get latest created folder
