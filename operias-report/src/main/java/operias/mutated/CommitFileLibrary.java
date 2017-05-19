@@ -38,15 +38,16 @@ public class CommitFileLibrary{
 					//if(counter>10)
 					//	flag = false;
 					
+					
 					//TODO this commit seems to block the process
-					//if(!commitID.equals("5c43ce2d83e44cd46049a7f0bfaeb5d9a322c032")&& !commitID.equals("472c7e55ee9d5cc7e7771696092c6eeca5a91b4d") && 
-						//	!commitID.equals("561d12a9894210d9f5a8a41d655361732a39b6c8") && !commitID.equals("1e85878fe008f6c651c348dd1d5b2edf713f63bb") && 
-							//!commitID.equals("a97385eb2870d113427b0d9430e108236ae363b4") && !commitID.equals("002a4940935a7545ed94f1b776e4d7f6bf6c2525") 
-							//&& flag){
+					if(!commitID.equals("5c43ce2d83e44cd46049a7f0bfaeb5d9a322c032")&& !commitID.equals("472c7e55ee9d5cc7e7771696092c6eeca5a91b4d") || 
+							!commitID.equals("561d12a9894210d9f5a8a41d655361732a39b6c8") && !commitID.equals("1e85878fe008f6c651c348dd1d5b2edf713f63bb") || 
+							!commitID.equals("a97385eb2870d113427b0d9430e108236ae363b4") && !commitID.equals("002a4940935a7545ed94f1b776e4d7f6bf6c2525") 
+							){
 						prefilteredCommitID.add(commitID);
 						//counter++;
-					//}
-				}
+					}
+				} 
 			}
 			
 					

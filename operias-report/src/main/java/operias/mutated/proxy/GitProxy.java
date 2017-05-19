@@ -92,7 +92,17 @@ public class GitProxy {
 			git = Git.cloneRepository()
 			        .setURI(settings.REMOTE_URL)
 			        .setDirectory(settings.pomPath)
+			        .setCloneAllBranches( true )
 			        .call();
+			
+			//checkout to different branch
+			//TODO branch name
+			//git.pull().call();
+			
+			//git.branchCreate().setForce(true).setName("text-no-normalization").setStartPoint("origin/" + "text-no-normalization").call();
+			//git.checkout().setName("text-no-normalization").call();
+			
+			
 		} catch (InvalidRemoteException e) {
 			Main.printLine("[OPi+][ERROR] Git Repo Processing: could not clone");
 			e.printStackTrace();

@@ -6,9 +6,8 @@ public class Line {
 
 	private int number;
 	private String type; //add or update
-	private boolean testCoverage;
+	private boolean branchCoverage;
 	private String newLine;
-	private String oldLine;
 	private int survivedMutants;
 	private int killedMutants;
 	private boolean noCoverageMutants;
@@ -17,13 +16,12 @@ public class Line {
 	
 	private ArrayList<Mutation> survivedMutantList;
 	
-	public Line(int number, String type, boolean testCoverage, String newLine, String oldLine){
+	public Line(int number, String type, boolean testCoverage, String newLine){
 		
 		 this.number=number;
 		 this.type= type; //add or update
-		 this.testCoverage=testCoverage;
+		 this.branchCoverage=testCoverage;
 		 this.newLine=newLine;
-		 this.oldLine=oldLine;
 		 survivedMutants=0;
 		 killedMutants=0;
 		 noCoverageMutants=false;
@@ -51,8 +49,8 @@ public class Line {
 		killedMutants++;
 	}
 	
-	public void setNoCoverage(){
-		noCoverageMutants=true;
+	public void setNoCoverage(boolean value){
+		noCoverageMutants=value;
 	}
 	
 	
@@ -77,17 +75,14 @@ public class Line {
 		return type;
 	}
 	
-	public boolean hasTestCoverage() {
-		return testCoverage;
+	public boolean hasBranchCoverage() {
+		return branchCoverage;
 	}
 	
 	public String getNewLine() {
 		return newLine;
 	}
 	
-	public String getOldLine() {
-		return oldLine;
-	}
 	
 
 	public String getBlueOutput() {

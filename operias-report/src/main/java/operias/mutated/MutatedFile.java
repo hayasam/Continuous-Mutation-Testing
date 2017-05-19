@@ -34,7 +34,7 @@ public class MutatedFile {
 		this.fileName = "";
 		this.diffCoveredLines = new ArrayList<Integer>();
 		for(Line currentLine: diffLines){
-			if(currentLine.hasTestCoverage()){
+			if(currentLine.hasBranchCoverage()){
 				this.diffCoveredLines.add(currentLine.getNumber());
 			}
 		}
@@ -134,7 +134,7 @@ public class MutatedFile {
 				Line line = lineArrayContains(diffLines, codeLineNumber);
 				if(line != null){
 					line.setBlueOutput("1");
-					line.setNoCoverage();
+					line.setNoCoverage(true);
 					counter++;
 				}else{
 					counter++;
@@ -220,25 +220,45 @@ public class MutatedFile {
 					line.incrementKilled();
 				}
 			}else if(description.contains("NO_COVERAGE")){
-				line.setNoCoverage();
+				line.setNoCoverage(true);
 			}
 		}
-		if(mutations.isEmpty()){
-			line.setBlueOutput("4");
-			Main.printLine("[OPi+][BLUE-4] all mutants are killed by tests for "+line.getNumber());
+		
+		//TODO flow din diagrama noua
+		//flow from thesis - explined in flow diagram also
+		if(line.getNoCoverage()==false && line.getKilled()==0 && mutations.isEmpty()){
+			line.setBlueOutput("2/3");
+			Main.printLine("[OPi+][BLUE-2/3] no mutants generated for "+line.getNumber());
 		}else{
-			
-			if(line.hasTestCoverage()){
-				line.setSurvivedMutantList(mutations);
-				line.setBlueOutput("5");
-				Main.printLine("[OPi+][BLUE-5] we have surviving mutants for line "+line.getNumber());
-			}else{
-				//Pitest looks at line coverage. So we rely on Operias branch coverage. we need good coverage for mutation testing
+			if(line.getNoCoverage()==true){
 				line.setBlueOutput("1");
-				Main.printLine("[OPi+][BLUE-1] the coverage is not good enough (there is no full branch coverage)");
+				Main.printLine("[OPi+][BLUE-1] need to kill the no_coverage mutants that exist "+line.getNumber());
+			}else{
+				if(line.getKilled()>0 && mutations.isEmpty()){
+					line.setBlueOutput("4*");
+					Main.printLine("[OPi+][BLUE-4*] special correct case due to good line coverage better than full branch coverage for line "+line.getNumber());
+				}else{
+					if(line.hasBranchCoverage()){
+						if(!mutations.isEmpty()){
+							line.setSurvivedMutantList(mutations);
+							line.setBlueOutput("5");
+							Main.printLine("[OPi+][BLUE-5] we have surviving mutants for line "+line.getNumber());
+						}else{
+							line.setBlueOutput("4");
+							Main.printLine("[OPi+][BLUE-4] all mutants are killed by tests for "+line.getNumber());
+						}
+					}else{
+						if(!mutations.isEmpty()){
+							//Pitest looks at line coverage. So we rely on Operias branch coverage. we need good coverage for mutation testing
+							line.setBlueOutput("1");
+							Main.printLine("[OPi+][BLUE-1] the coverage is not good enough (there is no full branch coverage)");
+						}else{
+							throw new SystemException(commitID, "this should actually be a 4* before in the flow. this should not happen", new Exception());
+						}
+					}
+				}
+				
 			}
-			
-			
 		}
 		
 	}

@@ -42,7 +42,12 @@ public class EvaluationRunner {
 		
 		//set up the project
 		String REMOTE_URL = "https://github.com/jhy/jsoup";
-				//"https://github.com/ileontiuc/jsoup";
+				//"https://github.com/epochcoder/jsoup";
+				//"https://github.com/lakshmirajagopalan/jsoup.git";
+				//"https://github.com/complanboy2/jsoup.git";
+				//"https://github.com/kno10/jsoup.git";
+				//"https://github.com/LukeButtersFunnelback/jsoup";
+				
 				//"https://github.com/jhy/jsoup";
 				//"https://github.com/ileontiuc/commons-text";
 				//"https://github.com/ileontiuc/testSettings"; 

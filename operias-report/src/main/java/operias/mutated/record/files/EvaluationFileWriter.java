@@ -21,7 +21,6 @@ public class EvaluationFileWriter {
 	private static String filePath;
 	private static String fileName;
 	private static int lineNumber;
-	private static String oldCodeLine;
 	private static String newCodeLine;
 	private static String blueOutput;
 	
@@ -117,7 +116,6 @@ public class EvaluationFileWriter {
 		text = text+filePath+SEPARATOR;
 		text = text+fileName+SEPARATOR;
 		text = text+lineNumber+SEPARATOR;
-		text = text+oldCodeLine+SEPARATOR;
 		text = text+newCodeLine+SEPARATOR;
 		text = text+changeType+SEPARATOR;
 		text = text+coverage+SEPARATOR;
@@ -161,13 +159,12 @@ public class EvaluationFileWriter {
 				ArrayList<Line> diffLines = mutatedFile.getDiffLines();
 				for(Line line: diffLines){
 					lineNumber = line.getNumber();
-					oldCodeLine = line.getOldLine();
 					newCodeLine = line.getNewLine();
 					changeType = line.getType();
 					
 					
 					
-					coverage = line.hasTestCoverage();
+					coverage = line.hasBranchCoverage();
 					
 					survived= line.getSuvived();
 					killed = line.getKilled();
@@ -189,7 +186,6 @@ public class EvaluationFileWriter {
 						recordNewLine();
 					}
 					lineNumber = -1;
-					oldCodeLine = "";
 					newCodeLine = "";
 					changeType = "";
 					coverage = false;

@@ -47,10 +47,11 @@ public class TestRunner {
 	
 	
 	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException, TransformerException, MavenInvocationException {
-		int CONDITIONALS_BOUNDARY_MUTATOR = 3;
-		String overview = "first line";
-		overview+= "\nCONDITIONALS_BOUNDARY_MUTATOR"+CONDITIONALS_BOUNDARY_MUTATOR;
-		System.out.println(overview);
+		
+		String currentFileChanged = "org.jsoup.select.Evaluator$Id";
+		String[] tokens = currentFileChanged.split("\\$");
+		System.out.println(tokens[0]);
+		
 	}
 	
 }

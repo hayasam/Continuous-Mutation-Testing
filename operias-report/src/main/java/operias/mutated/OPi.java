@@ -34,12 +34,14 @@ public class OPi {
 	private ArrayList<MutatedFile> mutatedFiles;
 	public static ArrayList<Line> updatedLines;
 	OperiasReport operiasReport;
+	private ArrayList<String> filesAnalyzed;
 
 	public OPi(OperiasReport operiasReport) throws PiTestException, SystemException {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
 		this.updatedLines = new ArrayList<Line>();
+		this.filesAnalyzed = new ArrayList<String>();
 		List<OperiasFile> filesChanged = operiasReport.getChangedClasses();
 		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size()); 
 		Main.printLine("[OPi+] Pipeline: Collecting all changed lines for each file");
@@ -47,10 +49,15 @@ public class OPi {
 		//operias looks ar class level, maybe it duplicates outside comment?? 
 		for(OperiasFile currentFileChanged : filesChanged){
 			//create mutated file
-			ArrayList<Line> changedLines = getLinesFromOperiasFile(currentFileChanged);
-			String currentFileName = currentFileChanged.getSourceDiff().getFileName(operiasReport);
-			if(changedLines.size()>0){
-				mutatedFiles.add(new MutatedFile(currentFileName, changedLines, Configuration.getRevisedCommitID()));
+			
+			String[] tokens = currentFileChanged.getClassName().split("\\$");
+			if(!filesAnalyzed.contains(tokens[0])){
+				ArrayList<Line> changedLines = getLinesFromOperiasFile(currentFileChanged);
+				String currentFileName = currentFileChanged.getSourceDiff().getFileName(operiasReport);
+				if(changedLines.size()>0){
+					mutatedFiles.add(new MutatedFile(currentFileName, changedLines, Configuration.getRevisedCommitID()));
+					filesAnalyzed.add(tokens[0]);
+				}
 			}
 		}
 		
@@ -79,7 +86,10 @@ public class OPi {
 	}
 
 	
-	
+
+
+
+
 
 	private void computeCommitImpactToLibrary() {
 		int currentCommitImpact = 0;
@@ -162,6 +172,7 @@ public class OPi {
 
 
 	private ArrayList<Line> processBlock(OperiasChange currentChange, OperiasFile currentFileChanged,  String changeType) {
+		
 		ArrayList<Line> changedLinesInBlock = new ArrayList<Line>();
 		boolean coverageFlag=false;
 		//int firstLineAdded = currentChange.getSourceDiffDelta().getRevised().getPosition()+1;
@@ -174,24 +185,14 @@ public class OPi {
 		Main.printLine("in the current block there are "+currentChange.getRevisedCoverage().size()+" lines affected");
 		
 		Delta delta = currentChange.getSourceDiffDelta();
-		
 		Chunk newChunk = delta.getRevised();
-		Chunk oldChunk = delta.getOriginal();
-		
-		
 		for(int i = 0; i<newChunk.getLines().size(); i++){
 			
 			if(blockCoverage.get(i)!=null && blockCoverage.get(i)){
 				coverageFlag=true;
 			}
 			
-			//TODO get old line??
 			String newLine = newChunk.getLines().get(i).toString();
-			String oldLine="";
-			//if(changeType.equals("UPDATE")){
-			//	oldLine= oldChunk.getLines().get(i).toString();
-			//} //maybe just print it when available ???
-			
 			String codeLine = newLine.replaceAll("\\s+","");
 			if(codeLine.startsWith("//")||codeLine.startsWith("*")||codeLine.startsWith("/*")||codeLine.endsWith("*/")||
 					codeLine.startsWith("@Override")||codeLine.startsWith("import")||codeLine.startsWith("package") ||
@@ -200,7 +201,13 @@ public class OPi {
 					codeLine.contains("a href")|| codeLine.isEmpty() || codeLine.startsWith("@")){
 				EvaluationRunner.commentLinesSkiped++;
 			}else{
-				Line currentLine = new Line(currentChange.getRevisedLineNumber()+i, changeType, coverageFlag, newLine, oldLine);
+				if(currentChange.getRevisedLineNumber()+i == 37){
+					System.out.println("----------------------------");
+					System.out.println(changeType);
+					System.out.println(coverageFlag);
+					System.out.println(newLine);
+				}
+				Line currentLine = new Line(currentChange.getRevisedLineNumber()+i, changeType, coverageFlag, newLine);
 				changedLinesInBlock.add(currentLine);
 			}
 			coverageFlag=false;	
