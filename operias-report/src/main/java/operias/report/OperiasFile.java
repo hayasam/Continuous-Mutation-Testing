@@ -153,7 +153,8 @@ public class OperiasFile {
 		}
 		
 		// Source diff starts at lines 0
-		Delta change = sourceDiff.tryGetChange(originalClassLine - 1, revisedClassLine - 1);
+		Delta change;
+		change = sourceDiff.tryGetChange(originalClassLine - 1, revisedClassLine - 1);
 		
 		if (change == null) {
 			// No source diff, check the coverage difference between the lines
@@ -221,7 +222,8 @@ public class OperiasFile {
 			
 			CompareLines(originalClassLine + change.getOriginal().getLines().size(), revisedClassLine + change.getRevised().getLines().size());
 		}
-		
+		//Cheat sheet: this Operias method goes into infinite loop for some projects
+		//System.out.println(originalClassLine+"   "+ revisedClassLine);
 	}
 
 	/**

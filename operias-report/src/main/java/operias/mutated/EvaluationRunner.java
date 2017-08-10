@@ -41,30 +41,19 @@ public class EvaluationRunner {
 		//RUN EVALUATION
 		
 		//set up the project
-		String REMOTE_URL = "https://github.com/jhy/jsoup";
-				//"https://github.com/epochcoder/jsoup";
-				//"https://github.com/lakshmirajagopalan/jsoup.git";
-				//"https://github.com/complanboy2/jsoup.git";
-				//"https://github.com/kno10/jsoup.git";
-				//"https://github.com/LukeButtersFunnelback/jsoup";
-				
-				//"https://github.com/jhy/jsoup";
-				//"https://github.com/ileontiuc/commons-text";
-				//"https://github.com/ileontiuc/testSettings"; 
-				
-				//"https://github.com/junit-team/junit5.git";
+		String REMOTE_URL = "https://github.com/apache/commons-io";
 		String MAVEN_PATH = "/usr/share/maven";
-		//TODO set limit
-		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 1;
+		int COMMIT_MUTATION_CHANGE_LOWER_LIMIT = 4;
 		localPathForOPiReport = "/home/ioana/a_Thesis_Evaluation";
-		
+		//Cheat Sheet: also the folder parsing must be adjusted in MutatedFile.setMutationReportPath(...)
+		//Cheat Sheet: can also adjust time limit for Operias threads in Operias.constructReport()
+		 
 		//JSoup
-		scmConnection="scm:git:https://github.com/jhy/jsoup.git";
-		scmURL="https://github.com/jhy/jsoup";
+		scmConnection="scm:git:http://git-wip-us.apache.org/repos/asf/commons-io.git";
+		scmURL="https://git-wip-us.apache.org/repos/asf?p=commons-io.git";
 		scmTag="HEAD";
-		scmDevConnection="scm:git:git@github.com:jhy/jsoup.git";
-		jUnitVersion="4.10";
-		
+		scmDevConnection="scm:git:https://git-wip-us.apache.org/repos/asf/commons-io.git";
+		jUnitVersion="4.12";
 		
 		
 		String[] tokens = REMOTE_URL.split("/");
@@ -178,10 +167,9 @@ public class EvaluationRunner {
 							   "-rru", repoLink,
 							   "-oc",  originalCommitID,
 							   "-rc",  revisedCommitID,
-							   "-d",   "IoanaOperias", // directory where the generated site will be placed
+							   "-d",   "OperiasTmp", // directory where the generated site will be placed
 							   "-v"};
 		
-		//String pathToPitestReport = "/home/ioana/TestLastCommitProject/target/pit-reports/";
 		Main.mutatedOperias(arguments);
 		
 	}

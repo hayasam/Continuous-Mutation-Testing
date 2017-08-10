@@ -15,6 +15,7 @@ import difflib.Delta;
 import operias.Configuration;
 import operias.Main;
 import operias.mutated.exceptions.FileException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.mutated.proxy.PitestProxy;
@@ -36,7 +37,7 @@ public class OPi {
 	OperiasReport operiasReport;
 	private ArrayList<String> filesAnalyzed;
 
-	public OPi(OperiasReport operiasReport) throws PiTestException, SystemException {
+	public OPi(OperiasReport operiasReport) throws PiTestException, SystemException, IncompatibleProjectException {
 		
 		this.operiasReport = operiasReport;
 		this.mutatedFiles = new ArrayList<MutatedFile>();
@@ -45,8 +46,7 @@ public class OPi {
 		List<OperiasFile> filesChanged = operiasReport.getChangedClasses();
 		Main.printLine("[OPi+] Pipeline: Number of files changes: "+filesChanged.size()); 
 		Main.printLine("[OPi+] Pipeline: Collecting all changed lines for each file");
-		//TODO write in thesis the list of files changed by Operias is larger than reality.i.e jsoup commit 3519d82fb3b11bc3a96b3598bfa9ccde9fae4fc9 has 38 file changes, and operias reports it as 99
-		//operias looks ar class level, maybe it duplicates outside comment?? 
+		//Cheat Sheet: the list of files changed by Operias is larger than reality.i.e jsoup commit 3519d82fb3b11bc3a96b3598bfa9ccde9fae4fc9 has 38 file changes, and operias reports it as 99
 		for(OperiasFile currentFileChanged : filesChanged){
 			//create mutated file
 			
@@ -201,12 +201,6 @@ public class OPi {
 					codeLine.contains("a href")|| codeLine.isEmpty() || codeLine.startsWith("@")){
 				EvaluationRunner.commentLinesSkiped++;
 			}else{
-				if(currentChange.getRevisedLineNumber()+i == 37){
-					System.out.println("----------------------------");
-					System.out.println(changeType);
-					System.out.println(coverageFlag);
-					System.out.println(newLine);
-				}
 				Line currentLine = new Line(currentChange.getRevisedLineNumber()+i, changeType, coverageFlag, newLine);
 				changedLinesInBlock.add(currentLine);
 			}
@@ -227,7 +221,7 @@ public class OPi {
 
 
 
-	private void runPreviousMutationAnalysis(String previousCommit) throws PiTestException, SystemException {
+	private void runPreviousMutationAnalysis(String previousCommit) throws PiTestException, SystemException, IncompatibleProjectException {
 		//run previous Pitest analysis
 		
 			//run pitest on previous commit and record data in different file?

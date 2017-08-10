@@ -9,10 +9,10 @@ public class IncompatibleProjectException extends Exception{
 	private String reason;
 
 
-  public IncompatibleProjectException(String commit) {
-	  super(commit+"This version of the project does not contain a pom file => no maven settings; fault caught by operias");
+  public IncompatibleProjectException(String commit, String reason) {
+	  super(commit+reason);
 	  this.commit=commit;
-      this.reason = "This version of the project does not contain a pom file => no maven settings; fault caught by operias";
+      this.reason = reason;
     }
   
  

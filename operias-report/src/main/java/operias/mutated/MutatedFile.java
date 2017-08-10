@@ -53,18 +53,23 @@ public class MutatedFile {
 	public String setMutationReportPath(String path) throws SystemException, FileException{
 		String[] tokens = systemFileName.split("/");
 		
-		//TODO jsoup hack path goes only 1 subfolder level down
+		//Cheat Sheet: math-commons hack path goes only 2 subfolder level down
 		String computedPath = null;
-		if(tokens.length==8){
-			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"/"+tokens[7]+".html";
-			fileName=tokens[7];
-		}else if(tokens.length==7){
-			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"/"+tokens[6]+".html";
-			fileName=tokens[6];
+		if(tokens.length==10){
+			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"."+tokens[7]+"."+tokens[8]+"/"+tokens[9]+".html";
+			fileName=tokens[9];
+		}else if(tokens.length==9){
+			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"."+tokens[7]+"/"+tokens[8]+".html";
+			fileName=tokens[8];
+		}else if(tokens.length==11){
+			computedPath = path+"/"+ tokens[4]+"."+tokens[5]+"."+tokens[6]+"."+tokens[7]+"."+tokens[8]+"."+tokens[9]+"/"+tokens[10]+".html";
+			fileName=tokens[10];
 		}else{
 			throw new FileException(commitID, "Can`t parse path to mutation report");
 		}
 		
+		///tmp/TestGitRepository5452494113826555087/target/pit-reports/201705271416/org.apache.commons.math.util/Pair.java.html
+		// [, src, main, java, org, apache, commons, math, util, Pair.java]
 		
 		File f = new File(computedPath);
 		if(f.exists() && !f.isDirectory()){
@@ -224,8 +229,7 @@ public class MutatedFile {
 			}
 		}
 		
-		//TODO flow din diagrama noua
-		//flow from thesis - explined in flow diagram also
+		//Cheat Sheet: this flow is explained in thesis text: continuous mutation testing analysis flow :)
 		if(line.getNoCoverage()==false && line.getKilled()==0 && mutations.isEmpty()){
 			line.setBlueOutput("2/3");
 			Main.printLine("[OPi+][BLUE-2/3] no mutants generated for "+line.getNumber());

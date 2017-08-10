@@ -28,6 +28,7 @@ import org.xml.sax.SAXException;
 
 import operias.Main;
 import operias.mutated.EvaluationRunner;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 
@@ -36,7 +37,7 @@ public class PitestProxy {
 	public static ThirdPartyProxySeetings settings;
 	private static boolean previousCommit;
 	
-	public static String getMutationReportFor(String commitID, boolean previousFlag) throws PiTestException, SystemException {
+	public static String getMutationReportFor(String commitID, boolean previousFlag) throws PiTestException, SystemException, IncompatibleProjectException {
 		/* due to Pitest run on last commit feature limitation we have to update the head 
 		 * each time to run the evaluation = running pitest on specific commit not just the last one
 		*/
@@ -50,7 +51,7 @@ public class PitestProxy {
 		
         
         //make sure pom file works on JUnit 4.10 and we have scm connection setup
-        File pomFile =  new File( settings.pomPath.getAbsolutePath()+"/pom.xml" );
+        File pomFile =  new File( settings.pomFile.getAbsolutePath()+"/pom.xml" );
         try {
 			updatePomFileForMutationProcess(pomFile);
 		} catch (ParserConfigurationException|SAXException|IOException|TransformerException e1) {
@@ -72,12 +73,7 @@ public class PitestProxy {
             //-DtargetTests="+GitProxy.getGroupArtifactPath()+" - used to fix the pitest bug but apparently it works for JSoup
             //mvn org.pitest:pitest-maven:scmMutationCoverage -DanalyseLastCommit -DtargetTests=groupID.artifactID.* -Dmutators=ALL
             
-            //TODO obs need this -DtargetTests=groupID.artifactID.*   for testSettings to run properly = mutants that are killed/survived not only no coverage
-            //-l logfile.txt
-            //mvn console output is stored in logfile.txt
-    		
-            
-            
+                 
             //run Pitest on last commit
             InvocationResult result;
     		try {
@@ -91,10 +87,10 @@ public class PitestProxy {
     	        	 * in this case there is no path for the mutation report 
     	        	 * and there is no need to further analyze
     	        	 */
-    	        	File logFilePath =  new File( settings.pomPath.getAbsolutePath()+"/logfile.txt");
+    	        	File logFilePath =  new File( settings.pomFile.getAbsolutePath()+"/logfile.txt");
     	        	if(isPitestAnalysis(logFilePath, commitID)){
     	        		Main.printLine("[OPi+][INFO] successfully run Pitest on last commit");
-    		        	mutationPath = settings.pomPath+"/target/pit-reports";
+    		        	mutationPath = settings.pomFile+"/target/pit-reports";
     		        	mutationPath = getLatestFilefromDir(mutationPath).getAbsolutePath();
     		        	
     		        	Main.printLine("[OPi+][INFO] My MUTATION REPORT path is: "+mutationPath+" for commit "+commitID);
@@ -112,7 +108,7 @@ public class PitestProxy {
 	}
 	
 	
-	private static void cleanProject(File pomFile, Invoker invoker, String commitID) throws PiTestException {
+	private static void cleanProject(File pomFile, Invoker invoker, String commitID) throws PiTestException, IncompatibleProjectException {
 		//setup Pitest on last commit
 		InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(pomFile);
@@ -123,7 +119,7 @@ public class PitestProxy {
 			result = invoker.execute( request );
 			if ( result.getExitCode() != 0 )
 	        {
-	            throw new IllegalStateException( "Build failed for refreshing the bytecode in last commit "+commitID );
+	            throw new IncompatibleProjectException(commitID, "unstable version on master branch: build failed for refreshing the bytecode in last commit" );
 	        }
 		} catch (MavenInvocationException|IllegalStateException e) {
 			Main.printLine("[OPi+][ERROR] could not refresh bytecode for pitest on last commit");

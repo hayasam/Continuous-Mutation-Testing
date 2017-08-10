@@ -10,6 +10,7 @@ import operias.coverage.CoverageReport;
 import operias.diff.DiffReport;
 import operias.mutated.OPi;
 import operias.mutated.exceptions.ExitRequiredException;
+import operias.mutated.exceptions.IncompatibleProjectException;
 import operias.mutated.exceptions.PiTestException;
 import operias.mutated.exceptions.SystemException;
 import operias.output.html.HTMLReport;
@@ -39,8 +40,9 @@ public class Operias {
 	 * @return Operias instance
 	 * @throws PiTestException 
 	 * @throws SystemException 
+	 * @throws IncompatibleProjectException 
 	 */
-	public Operias constructReport() throws ExitRequiredException, PiTestException, SystemException{
+	public Operias constructReport() throws ExitRequiredException, PiTestException, SystemException, IncompatibleProjectException{
 
 		if (Configuration.getOriginalDirectory() == null || Configuration.getRevisedDirectory() == null) {
 			Main.printLine("[Error] Missing either the original or the revised directory");
@@ -80,35 +82,46 @@ public class Operias {
 		Main.printLine("[Info] Starting threads");
 		clock = true;
 		
+		
 		reportRevisedThread.start();
 		reportOriginalThread.start();
 		reportFileDiffThread.start();
 		
 		try {
-			
-			reportRevisedThread.join();
-			reportOriginalThread.join();
-			reportFileDiffThread.join();
-			
+			//Cheat Sheet: update timelimit based on how many changes we set as limit
+			int timelock = 600000; //60 seconds
+			reportRevisedThread.join(timelock);
+			reportOriginalThread.join(timelock);
+			reportFileDiffThread.join(timelock); 
 			
 			Main.printLine("[Info] Start to combine reports");
 			
 			Main.printLine("-----------------------------output from threads after join");
 			if(clock){
+				if(reportOriginal!=null && reportRevised!=null){
+					try{
+						report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
+					}catch(StackOverflowError e){
+						Main.printLine("[Operias] error when creating report");
+						System.out.println("timeout from Operias");
+						throw new ExitRequiredException("malfunction in Operias Report due to stack overflow");
+					}
+					
+					Main.printLine("[[OPi+]]----START---------------------------------------------");
+					new OPi(report);
+					Main.printLine("[[OPi+]]----END---------------------------------------------");
+				}else{
+					throw new ExitRequiredException("operias threads timedout took more than "+timelock);
+				}
 				
-				report = new OperiasReport(reportOriginal, reportRevised, reportFileDiff);
-				
-				Main.printLine("[[OPi+]]----START---------------------------------------------");
-				new OPi(report);
-				Main.printLine("[[OPi+]]----END---------------------------------------------");
 			}else{
 				throw new ExitRequiredException("One of the threads in operias crashed");
 			}		
-		} catch (InterruptedException e1) {
+		 } catch (InterruptedException e1) {
 			//System.exit(OperiasStatus.ERROR_THREAD_JOINING.ordinal());
 			Main.printLine("[Operias] error when joining threads");
-			throw new ExitRequiredException(OperiasStatus.ERROR_THREAD_JOINING);
-		}
+			throw new ExitRequiredException(OperiasStatus.ERROR_THREAD_JOINING); 
+		 }
 		
 		
 		return this;

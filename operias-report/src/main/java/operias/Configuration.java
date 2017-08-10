@@ -182,7 +182,7 @@ public class Configuration {
 			Configuration.originalDirectory = originalDirectory;
 		} else {
 			//throw new InvalidParameterException("Error: '" + originalDirectory + "' is not a valid directory for Operias");
-			throw new IncompatibleProjectException(getOriginalCommitID());
+			throw new IncompatibleProjectException(getOriginalCommitID(), "This version of the project does not contain a pom file => no maven settings; fault caught by operias");
 		}
 	}
 	

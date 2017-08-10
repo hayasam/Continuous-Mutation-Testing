@@ -5,11 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.shared.invoker.DefaultInvocationRequest;
+import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.maven.shared.invoker.InvocationRequest;
+import org.apache.maven.shared.invoker.InvocationResult;
+import org.apache.maven.shared.invoker.Invoker;
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -31,6 +38,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import operias.Main;
 import operias.mutated.CommitFileLibrary;
+import operias.mutated.exceptions.PiTestException;
 
 public class GitProxy {
 
@@ -71,11 +79,11 @@ public class GitProxy {
 	public static boolean setFolder(){
 		// prepare a new folder for the cloned repository
 		try {
-			settings.pomPath = File.createTempFile("TestGitRepository", "");
-			 if(!settings.pomPath.delete()) {
-			        throw new IOException("Could not delete temporary file " + settings.pomPath);
+			settings.pomFile = File.createTempFile("TestGitRepository", "");
+			 if(!settings.pomFile.delete()) {
+			        throw new IOException("Could not delete temporary file " + settings.pomFile);
 			    }
-			 Main.printLine("[OPi+][INFO] Git Repo Processing: created temporary folder at "+ settings.pomPath.getAbsolutePath());
+			 Main.printLine("[OPi+][INFO] Git Repo Processing: created temporary folder at "+ settings.pomFile.getAbsolutePath());
 			 
 		} catch (IOException e) {
 			Main.printLine("[OPi+][Error] Git Repo Processing: could not create temporary folder");
@@ -91,12 +99,11 @@ public class GitProxy {
 			Main.printLine("[OPi+][INFO] Git Repo Processing: cloning from " + settings.REMOTE_URL);
 			git = Git.cloneRepository()
 			        .setURI(settings.REMOTE_URL)
-			        .setDirectory(settings.pomPath)
+			        .setDirectory(settings.pomFile)
 			        .setCloneAllBranches( true )
 			        .call();
 			
-			//checkout to different branch
-			//TODO branch name
+			//Cheat Sheet: checkout to different branch feature
 			//git.pull().call();
 			
 			//git.branchCreate().setForce(true).setName("text-no-normalization").setStartPoint("origin/" + "text-no-normalization").call();
@@ -114,8 +121,8 @@ public class GitProxy {
 			e.printStackTrace();
 		}
 		
-		pathToTmpFolder =  settings.pomPath.getAbsolutePath();
-		Main.printLine("[OPi+][INFO] Git Repo Processing: successfully cloned from " + settings.REMOTE_URL + " to " + settings.pomPath);
+		pathToTmpFolder =  settings.pomFile.getAbsolutePath();
+		Main.printLine("[OPi+][INFO] Git Repo Processing: successfully cloned from " + settings.REMOTE_URL + " to " + settings.pomFile);
 		return true;
 	}
 	
@@ -175,23 +182,31 @@ public class GitProxy {
 			automatically, but if you're running the goal manually you'll need to do an `mvn test` (or package as you are doing) first. ~Henry
          */
         Process mvnCleanPackageProcess;
-		try {
-			mvnCleanPackageProcess = Runtime.getRuntime().exec("mvn clean package -f "+settings.pomPath);
-			if(mvnCleanPackageProcess.waitFor()==0){
-				    	
-				Main.printLine("[OPi+][INFO] Git Repo Processing: successfully build the project");
-				return true;
-			}else{
-				Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
-				//we cant run pitest on this version since it does not build. we only build the system one time at the beginning
-				System.exit(1);
-			}
-		} catch (IOException|InterruptedException e) {
-			Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
-			e.printStackTrace();
-			return false;
-		}
-		return false;
+			Invoker invoker = new DefaultInvoker();	 
+	        invoker.setMavenHome(new File(settings.MAVEN_PATH));
+			InvocationRequest request = new DefaultInvocationRequest();
+            request.setPomFile(settings.pomFile);
+            
+            request.setGoals( Collections.singletonList( "clean package -l ignoreLogfile.txt" ) );
+            InvocationResult result;
+            try {
+   			 
+    			result = invoker.execute( request );
+    			if ( result.getExitCode() != 0 )
+    	        {
+    				Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
+    				//we cant run pitest on this version since it does not build. we only build the system one time at the beginning
+    				System.exit(1);
+    	        }else{
+    	        	Main.printLine("[OPi+][INFO] Git Repo Processing: successfully build the project");
+    				return true;
+    	        }
+            } catch (MavenInvocationException|IllegalStateException e) {
+            	Main.printLine("[OPi+][Error] Git Repo Processing: could not build repository project");
+    			e.printStackTrace();
+    			return false;
+    		}
+			return false; 
 	}
 
 
