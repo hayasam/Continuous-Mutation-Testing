@@ -9,7 +9,7 @@
 		<jdkVersion>1.8</jdkVersion>
 		<plugin.mvn.compiler.version>3.1</plugin.mvn.compiler.version>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
-		<arguments />
+		<arguments/>
 	</properties>
 	
 	<repositories>
@@ -86,7 +86,7 @@
 	<dependency>
 	    <groupId>org.slf4j</groupId>
 	    <artifactId>slf4j-simple</artifactId>
-	    <version>1.6.2</version>
+	    <version>1.7.36</version>
 	</dependency>
 	
 	
@@ -161,7 +161,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
