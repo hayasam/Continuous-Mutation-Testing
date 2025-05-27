@@ -9,7 +9,7 @@
 		<jdkVersion>1.8</jdkVersion>
 		<plugin.mvn.compiler.version>3.1</plugin.mvn.compiler.version>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
-		<arguments />
+		<arguments/>
 	</properties>
 	
 	<repositories>
@@ -52,7 +52,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>6.10.1.202505221210-r</version>
     </dependency>
 
 
@@ -61,7 +61,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit.http.server</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>6.10.1.202505221210-r</version>
     </dependency>
 
 
@@ -70,7 +70,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit.ui</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>6.10.1.202505221210-r</version>
     </dependency>
 
   <!-- JUnit Test Support -->
@@ -78,7 +78,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit.junit</artifactId>
-      <version>4.6.1.201703071140-r</version>
+      <version>6.10.1.202505221210-r</version>
     </dependency>
     
     
@@ -161,7 +161,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
